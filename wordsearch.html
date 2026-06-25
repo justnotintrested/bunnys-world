@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Search — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    :root { --ink:#0d0908; --gold:#c9a84c; --cream:#f0e8e0; --mist:#a08060; }
+    body { color:var(--cream); font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:640px; margin:0 auto; padding:2rem 1.5rem 5rem; text-align:center; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2rem; color:var(--gold); margin-bottom:.15rem; }
+    .subtitle { font-style:italic; color:var(--mist); margin-bottom:1.6rem; font-size:.95rem; }
+
+    .ws-board {
+      display:grid; gap:2px; margin:0 auto 1.4rem;
+      width:min(460px, 94vw);
+      background:#16100a; border:1px solid #2a1a10; border-radius:8px; padding:6px;
+      touch-action:none; user-select:none;
+    }
+    .ws-cell {
+      aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+      font-family:'Bodoni Moda',serif; font-size:clamp(.7rem, 2.6vw, 1rem);
+      color:#8a7050; border-radius:3px; cursor:pointer;
+      background:#1a1208;
+      transition:background .12s, color .12s;
+    }
+    .ws-cell.path { background:#3a2c10; color:var(--cream); }
+    .ws-cell.found { background:rgba(201,168,76,.22); color:var(--gold); }
+    .ws-cell.found.rose { background:rgba(196,30,58,.2); color:#e86a80; }
+
+    .word-list { display:flex; gap:.5rem .9rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.6rem; }
+    .word-chip {
+      font-size:.82rem; letter-spacing:.12em; color:var(--mist);
+      padding:.25rem .7rem; border:1px solid #2a1a10; border-radius:14px;
+      transition:all .2s;
+    }
+    .word-chip.got { color:var(--gold); border-color:rgba(201,168,76,.4); text-decoration:line-through; opacity:.65; }
+
+    .new-btn { background:var(--gold); border:none; color:#0d0908; padding:.42rem 1.2rem; border-radius:4px; cursor:pointer; font-family:'Bodoni Moda',serif; letter-spacing:.06em; }
+    .done-msg {
+      display:none; margin-bottom:1.4rem; padding:1rem;
+      border:1px solid rgba(201,168,76,.4); border-radius:8px;
+      background:rgba(201,168,76,.06); color:var(--gold); font-style:italic;
+    }
+    .done-msg.show { display:block; animation:pop .5s; }
+    @keyframes pop { from{transform:scale(.94);opacity:0} }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+  <div class="page-wrap">
+    <h1>Word Search</h1>
+    <p class="subtitle">your whole world, hidden in the letters — drag to find ♦</p>
+
+    <div class="done-msg" id="doneMsg">✨ all found — you know your world by heart ✨</div>
+
+    <div class="ws-board" id="board"></div>
+    <div class="word-list" id="wordList"></div>
+    <button class="new-btn" id="newBtn">New Puzzle ◆</button>
+  </div>
+
+  <script type="module">
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const POOL=[
+      'GINJU','BUNNY','TIFOSI','LECLERC','FERRARI','NIFT','CANCER','MOON',
+      'HAMILTON','MONZA','VELVET','ROSE','GOLD','PETAL','DREAM','SOFT',
+      'WINGS','JULY','SUZUKA','FABRIC','ATELIER','CRIMSON',
+    ];
+    const SIZE=12, WORDS_PER_GAME=8;
+    const DIRS=[[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0],[-1,-1],[1,-1]];
+
+    let grid=[], placed=[], found=new Set();
+    let dragging=false, path=[];
+
+    function newPuzzle(){
+      found=new Set(); path=[];
+      grid=Array.from({length:SIZE},()=>Array(SIZE).fill(''));
+      placed=[];
+      const words=[...POOL].sort(()=>Math.random()-.5).slice(0,WORDS_PER_GAME);
+
+      for(const w of words){
+        let ok=false;
+        for(let tries=0;tries<200&&!ok;tries++){
+          const [dr,dc]=DIRS[Math.floor(Math.random()*DIRS.length)];
+          const r0=Math.floor(Math.random()*SIZE), c0=Math.floor(Math.random()*SIZE);
+          const r1=r0+dr*(w.length-1), c1=c0+dc*(w.length-1);
+          if(r1<0||r1>=SIZE||c1<0||c1>=SIZE)continue;
+          let fits=true;
+          for(let i=0;i<w.length;i++){
+            const ch=grid[r0+dr*i][c0+dc*i];
+            if(ch&&ch!==w[i]){fits=false;break;}
+          }
+          if(!fits)continue;
+          const cells=[];
+          for(let i=0;i<w.length;i++){
+            grid[r0+dr*i][c0+dc*i]=w[i];
+            cells.push((r0+dr*i)+'_'+(c0+dc*i));
+          }
+          placed.push({word:w, cells});
+          ok=true;
+        }
+      }
+      // fill blanks
+      const AB='ABCDEFGHILMNORSTUV';
+      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)
+        if(!grid[r][c])grid[r][c]=AB[Math.floor(Math.random()*AB.length)];
+      render();
+    }
+
+    function render(){
+      const board=document.getElementById('board');
+      board.innerHTML='';
+      board.style.gridTemplateColumns=`repeat(${SIZE},1fr)`;
+      const foundCells=new Map(); // key → rose?
+      placed.forEach((p,i)=>{ if(found.has(p.word))p.cells.forEach(k=>foundCells.set(k, i%2===1)); });
+
+      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+        const key=r+'_'+c;
+        const el=document.createElement('div');
+        el.className='ws-cell'
+          +(path.includes(key)?' path':'')
+          +(foundCells.has(key)?' found'+(foundCells.get(key)?' rose':''):'');
+        el.textContent=grid[r][c];
+        el.dataset.key=key;
+        board.appendChild(el);
+      }
+
+      const wl=document.getElementById('wordList');wl.innerHTML='';
+      placed.forEach(p=>{
+        const chip=document.createElement('span');
+        chip.className='word-chip'+(found.has(p.word)?' got':'');
+        chip.textContent=p.word;
+        wl.appendChild(chip);
+      });
+
+      document.getElementById('doneMsg').classList.toggle('show',
+        placed.length>0&&placed.every(p=>found.has(p.word)));
+    }
+
+    // ── drag selection (straight lines only) ───────────────────────
+    const board=document.getElementById('board');
+    function cellFromEvent(e){
+      const el=document.elementFromPoint(e.clientX,e.clientY);
+      return el?.classList?.contains('ws-cell')?el.dataset.key:null;
+    }
+    function straighten(start,end){
+      const [r0,c0]=start.split('_').map(Number);
+      const [r1,c1]=end.split('_').map(Number);
+      const dr=Math.sign(r1-r0), dc=Math.sign(c1-c0);
+      const len=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
+      // must be straight or 45°
+      if(!(r0===r1||c0===c1||Math.abs(r1-r0)===Math.abs(c1-c0)))return null;
+      const out=[];
+      for(let i=0;i<=len;i++)out.push((r0+dr*i)+'_'+(c0+dc*i));
+      return out;
+    }
+    let startKey=null;
+    board.addEventListener('pointerdown',e=>{
+      const k=cellFromEvent(e);if(!k)return;
+      dragging=true;startKey=k;path=[k];render();
+    });
+    board.addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      const k=cellFromEvent(e);if(!k)return;
+      const line=straighten(startKey,k);
+      if(line){path=line;render();}
+    });
+    addEventListener('pointerup',()=>{
+      if(!dragging)return;
+      dragging=false;
+      // check selection against placed words (both directions)
+      const sel=path.join(',');
+      const rev=[...path].reverse().join(',');
+      placed.forEach(p=>{
+        const w=p.cells.join(',');
+        if(w===sel||w===rev)found.add(p.word);
+      });
+      path=[];render();
+    });
+
+    document.getElementById('newBtn').onclick=newPuzzle;
+    newPuzzle();
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soft Pixel Mock — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#241c2c; --panel:#2e2438; --wine:#7c4456;
+      --pink:#cc7888; --peach:#f0b8a0; --cream:#f8ecd8;
+      --shadow:#181220;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { image-rendering:pixelated; }
+    body {
+      background:var(--bg);
+      color:var(--cream);
+      font-family:'VT323', monospace;
+      font-size:20px;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+    /* dithered sky checkerboard */
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:
+        repeating-conic-gradient(rgba(248,236,216,.025) 0 25%, transparent 0 50%);
+      background-size:8px 8px;
+    }
+
+    .px-wrap { position:relative; z-index:1; max-width:720px; margin:0 auto; padding:1.2rem 1rem 4rem; }
+
+    /* pixel borders via box-shadow steps */
+    .px-panel {
+      background:var(--panel);
+      border:4px solid var(--cream);
+      box-shadow: 0 0 0 4px var(--shadow), 8px 8px 0 4px var(--shadow);
+      padding:1.4rem 1.2rem;
+      margin-bottom:1.8rem;
+    }
+
+    /* nav */
+    .px-nav {
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.6rem;
+      background:var(--wine);
+      border:4px solid var(--cream);
+      box-shadow:0 0 0 4px var(--shadow);
+      padding:.6rem 1rem; margin-bottom:2rem;
+    }
+    .px-logo { font-family:'Press Start 2P', monospace; font-size:13px; color:var(--cream); text-shadow:2px 2px 0 var(--shadow); }
+    .px-links { display:flex; gap:1rem; font-size:18px; }
+    .px-links a { color:var(--peach); text-decoration:none; }
+    .px-links a:hover { color:var(--cream); background:var(--pink); padding:0 4px; }
+
+    /* hero */
+    .hero { text-align:center; padding:1.6rem 0 1rem; }
+    .hero-eyebrow { font-size:17px; color:var(--pink); letter-spacing:.12em; margin-bottom:1rem; }
+    .hero-title {
+      font-family:'Press Start 2P', monospace;
+      font-size:clamp(20px, 6vw, 38px);
+      line-height:1.5; color:var(--peach);
+      text-shadow:3px 3px 0 var(--wine), 6px 6px 0 var(--shadow);
+      margin-bottom:1.4rem;
+    }
+    .hero-sub { font-size:20px; color:var(--cream); opacity:.85; }
+
+    /* pixel bunny — box-shadow sprite, 14x14 grid */
+    .bunny-stage { display:flex; justify-content:center; margin:1.6rem 0 .6rem; height:130px; align-items:flex-end; }
+    .bunny {
+      width:8px; height:8px; position:relative;
+      animation:hop 1.6s ease-in-out infinite;
+    }
+    @keyframes hop { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-22px)} 50%{transform:translateY(0)} }
+    .bunny::before {
+      content:''; position:absolute; width:8px; height:8px; background:transparent;
+      box-shadow:
+        /* ears */ -24px -64px var(--cream), -24px -56px var(--cream), -24px -48px var(--cream),
+        16px -64px var(--cream), 16px -56px var(--cream), 16px -48px var(--cream),
+        -24px -56px var(--cream), /* inner ear */ -24px -56px var(--pink), 16px -56px var(--pink),
+        /* head */ -32px -40px var(--cream), -24px -40px var(--cream), -16px -40px var(--cream), -8px -40px var(--cream), 0 -40px var(--cream), 8px -40px var(--cream), 16px -40px var(--cream), 24px -40px var(--cream),
+        -32px -32px var(--cream), -24px -32px var(--shadow), -16px -32px var(--cream), -8px -32px var(--cream), 0 -32px var(--cream), 8px -32px var(--shadow), 16px -32px var(--cream), 24px -32px var(--cream),
+        -32px -24px var(--cream), -24px -24px var(--cream), -16px -24px var(--cream), -8px -24px var(--pink), 0 -24px var(--cream), 8px -24px var(--cream), 16px -24px var(--cream), 24px -24px var(--cream),
+        /* body */ -40px -16px var(--cream), -32px -16px var(--cream), -24px -16px var(--cream), -16px -16px var(--cream), -8px -16px var(--cream), 0 -16px var(--cream), 8px -16px var(--cream), 16px -16px var(--cream), 24px -16px var(--cream), 32px -16px var(--cream),
+        -40px -8px var(--cream), -32px -8px var(--cream), -24px -8px var(--cream), -16px -8px var(--cream), -8px -8px var(--cream), 0 -8px var(--cream), 8px -8px var(--cream), 16px -8px var(--cream), 24px -8px var(--cream), 32px -8px var(--peach),
+        /* feet */ -32px 0 var(--peach), -16px 0 var(--peach), 8px 0 var(--peach), 24px 0 var(--peach);
+    }
+    .bunny-caption { text-align:center; font-size:17px; color:var(--pink); margin-bottom:1.6rem; }
+
+    /* countdown */
+    .cd-label { font-family:'Press Start 2P', monospace; font-size:11px; color:var(--pink); text-align:center; margin-bottom:1rem; }
+    .cd-row { display:flex; justify-content:center; gap:.8rem; flex-wrap:wrap; }
+    .cd-box {
+      background:var(--bg);
+      border:4px solid var(--peach);
+      box-shadow:4px 4px 0 var(--shadow);
+      padding:.7rem .9rem; text-align:center; min-width:74px;
+    }
+    .cd-num { font-family:'Press Start 2P', monospace; font-size:22px; color:var(--cream); display:block; }
+    .cd-unit { font-size:16px; color:var(--pink); }
+
+    /* hp bar = year progress */
+    .hp-row { margin-top:1.4rem; text-align:center; }
+    .hp-label { font-size:17px; color:var(--peach); margin-bottom:.4rem; }
+    .hp-bar { height:20px; border:4px solid var(--cream); box-shadow:4px 4px 0 var(--shadow); background:var(--bg); position:relative; max-width:380px; margin:0 auto; }
+    .hp-fill { position:absolute; inset:0; width:62%; background:repeating-linear-gradient(90deg, var(--pink) 0 8px, var(--peach) 8px 16px); }
+
+    /* menu cards */
+    .menu-title { font-family:'Press Start 2P', monospace; font-size:13px; color:var(--peach); text-align:center; margin:2.2rem 0 1.2rem; text-shadow:2px 2px 0 var(--shadow); }
+    .menu { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:1.1rem; }
+    .menu-item {
+      background:var(--panel);
+      border:4px solid var(--cream);
+      box-shadow:0 0 0 4px var(--shadow);
+      padding:1rem; cursor:pointer; text-decoration:none; color:var(--cream);
+      transition:transform .08s;
+      position:relative;
+    }
+    .menu-item:hover { transform:translate(-2px,-2px); box-shadow:0 0 0 4px var(--shadow), 6px 6px 0 4px var(--shadow); }
+    .menu-item:hover::before { content:'▶'; position:absolute; left:-2px; top:8px; color:var(--peach); font-size:14px; }
+    .mi-icon { font-size:26px; display:block; margin-bottom:.4rem; }
+    .mi-name { font-family:'Press Start 2P', monospace; font-size:11px; line-height:1.7; color:var(--peach); display:block; margin-bottom:.3rem; }
+    .mi-desc { font-size:17px; opacity:.8; line-height:1.25; display:block; }
+
+    .press-start {
+      text-align:center; margin-top:2.5rem;
+      font-family:'Press Start 2P', monospace; font-size:11px; color:var(--cream);
+      animation:blink 1.2s steps(2) infinite;
+    }
+    @keyframes blink { 50%{opacity:0} }
+
+    .mock-banner {
+      position:fixed; bottom:0; left:0; right:0; z-index:50;
+      background:var(--shadow); color:var(--peach);
+      font-size:16px; text-align:center; padding:.35rem;
+      border-top:3px solid var(--pink);
+    }
+  </style>
+</head>
+<body>
+  <div class="px-wrap">
+
+    <nav class="px-nav">
+      <span class="px-logo">BUNNY'S WORLD</span>
+      <div class="px-links">
+        <a href="#">HER WORLD</a><a href="#">TRACKERS</a><a href="#">CANCER</a><a href="#">GINJU</a>
+      </div>
+    </nav>
+
+    <div class="hero">
+      <p class="hero-eyebrow">EST. 13.07.2001 ★ A CANCER BORN WITH WINGS</p>
+      <h1 class="hero-title">BUNNY'S<br/>WORLD</h1>
+      <p class="hero-sub">a tiny save file of everything she is ♥</p>
+    </div>
+
+    <div class="bunny-stage"><div class="bunny"></div></div>
+    <p class="bunny-caption">* bunny hops along beside you *</p>
+
+    <div class="px-panel">
+      <p class="cd-label">NEXT LEVEL UNLOCKS IN</p>
+      <div class="cd-row">
+        <div class="cd-box"><span class="cd-num" id="d">32</span><span class="cd-unit">days</span></div>
+        <div class="cd-box"><span class="cd-num" id="h">11</span><span class="cd-unit">hrs</span></div>
+        <div class="cd-box"><span class="cd-num" id="m">24</span><span class="cd-unit">min</span></div>
+        <div class="cd-box"><span class="cd-num" id="s">09</span><span class="cd-unit">sec</span></div>
+      </div>
+      <div class="hp-row">
+        <p class="hp-label">LEVEL 24 → LEVEL 25</p>
+        <div class="hp-bar"><div class="hp-fill" id="xp"></div></div>
+      </div>
+    </div>
+
+    <p class="menu-title">— SELECT A WORLD —</p>
+    <div class="menu">
+      <a class="menu-item" href="#"><span class="mi-icon">📔</span><span class="mi-name">JOURNAL</span><span class="mi-desc">write it down, lock it tight</span></a>
+      <a class="menu-item" href="#"><span class="mi-icon">🎨</span><span class="mi-name">COLOUR QUEST</span><span class="mi-desc">paint by number, pixel by pixel</span></a>
+      <a class="menu-item" href="#"><span class="mi-icon">🌱</span><span class="mi-name">THE GARDEN</span><span class="mi-desc">log days, grow flowers</span></a>
+      <a class="menu-item" href="#"><span class="mi-icon">🏎️</span><span class="mi-name">SCUDERIA</span><span class="mi-desc">forever tifosi, forever ferrari</span></a>
+      <a class="menu-item" href="#"><span class="mi-icon">🃏</span><span class="mi-name">DAILY CARD</span><span class="mi-desc">one pull a day, choose wisely</span></a>
+      <a class="menu-item" href="#"><span class="mi-icon">🪙</span><span class="mi-name">WISHING WELL</span><span class="mi-desc">drop a coin, keep a secret</span></a>
+    </div>
+
+    <p class="press-start">PRESS START TO CONTINUE</p>
+  </div>
+
+  <div class="mock-banner">SOFT PIXEL — theme mock · not wired up</div>
+
+  <script>
+    const target = new Date('2026-07-13T00:00:00+05:30');
+    function tick(){
+      const diff = Math.max(0, target - Date.now());
+      const d = Math.floor(diff/86400000), h = Math.floor(diff/3600000)%24,
+            m = Math.floor(diff/60000)%60, s = Math.floor(diff/1000)%60;
+      document.getElementById('d').textContent = d;
+      document.getElementById('h').textContent = String(h).padStart(2,'0');
+      document.getElementById('m').textContent = String(m).padStart(2,'0');
+      document.getElementById('s').textContent = String(s).padStart(2,'0');
+      const yearStart = new Date('2025-07-13'), yearEnd = target;
+      document.getElementById('xp').style.width = Math.min(100, (Date.now()-yearStart)/(yearEnd-yearStart)*100) + '%';
+    }
+    tick(); setInterval(tick, 1000);
+  </script>
+</body>
+</html>

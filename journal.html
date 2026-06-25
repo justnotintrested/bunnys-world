@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Journal — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, #0d0510, var(--ink) 70%);
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 7vw, 5rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.5rem; }
+
+    /* Layout */
+    .journal-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      min-height: 70vh;
+      border: 1px solid rgba(201,168,76,0.08);
+    }
+
+    /* Sidebar */
+    .journal-sidebar {
+      border-right: 1px solid rgba(201,168,76,0.08);
+      padding: 1.5rem 0;
+      background: rgba(201,168,76,0.015);
+    }
+    .sidebar-header {
+      padding: 0 1.2rem 1rem;
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-header p {
+      font-size: 0.55rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.5;
+    }
+    .new-entry-btn {
+      width: calc(100% - 2.4rem);
+      margin: 0.8rem 1.2rem;
+      text-align: center;
+      font-size: 0.65rem;
+    }
+
+    .entry-list { list-style: none; }
+    .entry-list-item {
+      padding: 0.8rem 1.2rem;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .entry-list-item:hover { background: rgba(201,168,76,0.04); }
+    .entry-list-item.active {
+      border-left-color: var(--gold);
+      background: rgba(201,168,76,0.06);
+    }
+    .entry-list-item .ei-title {
+      font-size: 0.85rem; color: var(--cream);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .entry-list-item .ei-date {
+      font-size: 0.58rem; letter-spacing: 0.1em;
+      color: var(--mist); opacity: 0.5; margin-top: 0.15rem;
+    }
+    .entry-list-item .ei-lock {
+      font-size: 0.6rem; color: var(--gold); opacity: 0.6;
+    }
+    .sidebar-empty {
+      padding: 2rem 1.2rem;
+      font-size: 0.75rem; font-style: italic;
+      color: var(--mist); opacity: 0.4; text-align: center;
+    }
+
+    /* Editor */
+    .journal-editor {
+      padding: 2rem;
+      display: flex; flex-direction: column;
+    }
+
+    .editor-toolbar {
+      display: flex; gap: 0.8rem; align-items: center;
+      margin-bottom: 1.2rem; flex-wrap: wrap;
+    }
+    .editor-toolbar input[type="text"] {
+      flex: 1; min-width: 200px;
+      background: transparent;
+      border: none; border-bottom: 1px solid rgba(201,168,76,0.2);
+      padding: 0.4rem 0;
+      color: var(--cream);
+      font-family: var(--ff-disp);
+      font-size: 1.3rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .editor-toolbar input[type="text"]:focus { border-color: var(--gold); }
+    .editor-toolbar input[type="text"]::placeholder { color: var(--mist); opacity: 0.3; font-family: var(--ff-serif); font-size: 1rem; }
+
+    .toolbar-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    .tool-btn {
+      background: transparent; border: 1px solid rgba(201,168,76,0.2);
+      border-radius: var(--radius); padding: 0.4rem 0.8rem;
+      color: var(--mist); font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tool-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .tool-btn.locked { color: var(--rose); border-color: rgba(196,30,58,0.3); }
+    .tool-btn.locked:hover { border-color: var(--rose); }
+
+    .editor-meta {
+      display: flex; gap: 1.5rem; align-items: center;
+      margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .editor-meta span {
+      font-size: 0.58rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.4;
+    }
+    .mood-select {
+      background: transparent;
+      border: none; border-bottom: 1px solid rgba(201,168,76,0.15);
+      color: var(--mist); font-family: var(--ff-serif);
+      font-size: 0.75rem; outline: none; cursor: pointer;
+      padding: 0.15rem 0; opacity: 0.7;
+    }
+    .mood-select option { background: var(--ink-soft); }
+
+    .editor-body {
+      flex: 1;
+      min-height: 400px;
+    }
+    .editor-textarea {
+      width: 100%; min-height: 420px;
+      background: transparent;
+      border: none;
+      color: var(--cream);
+      font-family: var(--ff-serif);
+      font-size: 1.05rem;
+      line-height: 1.9;
+      outline: none;
+      resize: none;
+    }
+    .editor-textarea::placeholder { color: var(--mist); opacity: 0.3; font-style: italic; }
+
+    .editor-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(201,168,76,0.08);
+      margin-top: 1rem;
+      flex-wrap: wrap; gap: 0.5rem;
+    }
+    .word-count {
+      font-size: 0.58rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.35;
+    }
+    .editor-btns { display: flex; gap: 0.6rem; }
+
+    /* Locked entry overlay */
+    .locked-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 400px;
+      text-align: center;
+    }
+    .locked-overlay.show { display: flex; }
+    .lock-icon { font-size: 2rem; color: var(--gold); opacity: 0.4; margin-bottom: 1rem; }
+    .locked-overlay p {
+      font-style: italic; color: var(--mist); opacity: 0.5;
+      margin-bottom: 1.5rem; font-size: 0.9rem;
+    }
+    .lock-input {
+      background: transparent;
+      border: none; border-bottom: 1px solid rgba(201,168,76,0.3);
+      color: var(--cream);
+      font-family: var(--ff-serif); font-size: 1rem;
+      letter-spacing: 0.3em; text-align: center;
+      padding: 0.4rem 0; outline: none; width: 180px;
+      margin-bottom: 1rem;
+    }
+    .lock-input:focus { border-color: var(--gold); }
+
+    /* Empty state */
+    .editor-empty {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 400px; text-align: center;
+    }
+    .editor-empty p { font-style: italic; color: var(--mist); opacity: 0.35; }
+    .editor-empty .ornament { opacity: 0.2; margin-bottom: 1rem; }
+
+    /* Lock pin modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(13,9,8,0.85);
+      align-items: center; justify-content: center;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-box {
+      background: var(--ink-soft);
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 2.5rem 3rem;
+      max-width: 380px; width: 90%;
+      text-align: center;
+      border-radius: var(--radius);
+    }
+    .modal-box h3 {
+      font-family: var(--ff-disp); color: var(--gold);
+      font-size: 1.3rem; margin-bottom: 0.5rem;
+    }
+    .modal-box p {
+      font-style: italic; color: var(--mist); font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .modal-btns { display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; }
+
+    @media (max-width: 700px) {
+      .journal-layout { grid-template-columns: 1fr; }
+      .journal-sidebar { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.08); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.5;">Her World</p>
+    <h1>Journal</h1>
+    <p>your private space — write anything, keep everything.</p>
+  </div>
+
+  <div style="max-width:1100px;margin:2rem auto;padding:0 1.5rem 5rem;">
+    <div class="journal-layout">
+
+      <!-- Sidebar -->
+      <aside class="journal-sidebar">
+        <div class="sidebar-header">
+          <p>Your Entries</p>
+        </div>
+        <button class="btn btn-gold new-entry-btn" id="new-btn">+ New Entry</button>
+        <ul class="entry-list" id="entry-list">
+          <li class="sidebar-empty">No entries yet.<br>Begin your first.</li>
+        </ul>
+      </aside>
+
+      <!-- Editor -->
+      <div class="journal-editor" id="editor-panel">
+
+        <!-- Empty state -->
+        <div class="editor-empty" id="empty-state">
+          <span class="ornament">✦</span>
+          <p>Select an entry or create a new one.</p>
+        </div>
+
+        <!-- Locked state -->
+        <div class="locked-overlay" id="locked-state">
+          <div class="lock-icon">◆</div>
+          <p>This entry is locked.<br>Enter the pin to read it.</p>
+          <input class="lock-input" id="unlock-pin" type="password" placeholder="pin" maxlength="10" />
+          <button class="btn btn-gold" id="unlock-btn">Unlock</button>
+          <p id="pin-error" style="color:var(--rose);font-size:0.7rem;margin-top:0.8rem;opacity:0;transition:opacity 0.3s;">wrong pin</p>
+        </div>
+
+        <!-- Active editor -->
+        <div id="active-editor" style="display:none;flex-direction:column;height:100%;">
+          <div class="editor-toolbar">
+            <input type="text" id="entry-title" placeholder="Entry title…" />
+            <div class="toolbar-actions">
+              <button class="tool-btn" id="lock-toggle-btn" title="Lock this entry">◆ Lock</button>
+              <button class="tool-btn" id="delete-entry-btn" style="color:var(--rose);border-color:rgba(196,30,58,0.2);">✕</button>
+            </div>
+          </div>
+          <div class="editor-meta">
+            <span id="entry-date-display">—</span>
+            <span>Mood:</span>
+            <select class="mood-select" id="entry-mood">
+              <option value="">— none —</option>
+              <option value="🌙 tender">🌙 tender</option>
+              <option value="🌹 romantic">🌹 romantic</option>
+              <option value="🌧 melancholic">🌧 melancholic</option>
+              <option value="✨ glowing">✨ glowing</option>
+              <option value="🔥 fierce">🔥 fierce</option>
+              <option value="🌿 calm">🌿 calm</option>
+              <option value="🌑 dark">🌑 dark</option>
+              <option value="💛 grateful">💛 grateful</option>
+              <option value="😤 frustrated">😤 frustrated</option>
+              <option value="🌸 soft">🌸 soft</option>
+            </select>
+          </div>
+          <div class="editor-body">
+            <textarea class="editor-textarea" id="entry-body"
+              placeholder="Write freely. This is yours alone. No one reads this but you.
+
+The page waits — patient, unhurried. Begin wherever you are."></textarea>
+          </div>
+          <div class="editor-footer">
+            <span class="word-count" id="word-count">0 words</span>
+            <div class="editor-btns">
+              <button class="btn btn-ghost" id="discard-btn">Discard</button>
+              <button class="btn btn-gold" id="save-btn">Save ◆</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Lock pin modal -->
+  <div class="modal-backdrop" id="lock-modal">
+    <div class="modal-box">
+      <h3>Lock this entry?</h3>
+      <p>Set a personal pin. You'll need it to read this entry later.</p>
+      <input class="input" id="pin-input" type="password" placeholder="Choose a pin" maxlength="20" style="text-align:center;letter-spacing:0.3em;" />
+      <div class="modal-btns">
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+        <button class="btn btn-gold" id="modal-confirm">Lock ◆</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    import { db, ref, push, onValue, update, remove } from './js/firebase-config.js';
+
+    initGate();
+
+    const DB_PATH = 'journal';
+    let entries = {};
+    let activeKey = null;
+    let isDirty = false;
+
+    // ── Firebase listener ────────────────────────────────────────────
+    const listRef = ref(db, DB_PATH);
+    onValue(listRef, snap => {
+      entries = snap.val() || {};
+      renderSidebar();
+      // If active entry was deleted externally, reset
+      if (activeKey && !entries[activeKey]) showEmpty();
+    });
+
+    // ── Sidebar render ───────────────────────────────────────────────
+    function renderSidebar() {
+      const ul = document.getElementById('entry-list');
+      const sorted = Object.entries(entries)
+        .sort(([,a],[,b]) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt));
+
+      if (sorted.length === 0) {
+        ul.innerHTML = '<li class="sidebar-empty">No entries yet.<br>Begin your first.</li>';
+        return;
+      }
+      ul.innerHTML = sorted.map(([key, e]) => `
+        <li class="entry-list-item ${key === activeKey ? 'active' : ''}" data-key="${key}">
+          <div class="ei-title">${escHtml(e.title || 'Untitled')}</div>
+          <div class="ei-date">${formatDate(e.updatedAt || e.createdAt)} ${e.locked ? '<span class="ei-lock">◆</span>' : ''}</div>
+        </li>
+      `).join('');
+      ul.querySelectorAll('.entry-list-item').forEach(li => {
+        li.addEventListener('click', () => selectEntry(li.dataset.key));
+      });
+    }
+
+    // ── Select entry ─────────────────────────────────────────────────
+    function selectEntry(key) {
+      if (isDirty && activeKey) {
+        if (!confirm('You have unsaved changes. Discard them?')) return;
+        isDirty = false;
+      }
+      activeKey = key;
+      renderSidebar();
+      const e = entries[key];
+      if (!e) return;
+
+      if (e.locked) {
+        showLockedState();
+      } else {
+        showEditor(e);
+      }
+    }
+
+    function showEditor(e) {
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('locked-state').classList.remove('show');
+      document.getElementById('active-editor').style.display = 'flex';
+
+      document.getElementById('entry-title').value = e.title || '';
+      document.getElementById('entry-body').value = e.body || '';
+      document.getElementById('entry-mood').value = e.mood || '';
+      document.getElementById('entry-date-display').textContent = formatDate(e.updatedAt || e.createdAt);
+      document.getElementById('lock-toggle-btn').textContent = e.locked ? '◆ Unlock' : '◆ Lock';
+      updateWordCount();
+      isDirty = false;
+    }
+
+    function showLockedState() {
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('active-editor').style.display = 'none';
+      document.getElementById('locked-state').classList.add('show');
+      document.getElementById('unlock-pin').value = '';
+      document.getElementById('pin-error').style.opacity = '0';
+    }
+
+    function showEmpty() {
+      activeKey = null;
+      document.getElementById('empty-state').style.display = 'flex';
+      document.getElementById('active-editor').style.display = 'none';
+      document.getElementById('locked-state').classList.remove('show');
+      isDirty = false;
+    }
+
+    // ── Unlock locked entry ──────────────────────────────────────────
+    document.getElementById('unlock-btn').addEventListener('click', tryUnlock);
+    document.getElementById('unlock-pin').addEventListener('keydown', e => {
+      if (e.key === 'Enter') tryUnlock();
+    });
+
+    function tryUnlock() {
+      if (!activeKey) return;
+      const e = entries[activeKey];
+      const pin = document.getElementById('unlock-pin').value;
+      if (pin === e.pin) {
+        showEditor(e);
+      } else {
+        const err = document.getElementById('pin-error');
+        err.style.opacity = '1';
+        setTimeout(() => err.style.opacity = '0', 2000);
+        document.getElementById('unlock-pin').value = '';
+      }
+    }
+
+    // ── New entry ────────────────────────────────────────────────────
+    document.getElementById('new-btn').addEventListener('click', () => {
+      if (isDirty && activeKey) {
+        if (!confirm('You have unsaved changes. Discard them?')) return;
+        isDirty = false;
+      }
+      activeKey = null;
+      renderSidebar();
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('locked-state').classList.remove('show');
+      document.getElementById('active-editor').style.display = 'flex';
+      document.getElementById('entry-title').value = '';
+      document.getElementById('entry-body').value = '';
+      document.getElementById('entry-mood').value = '';
+      document.getElementById('entry-date-display').textContent = formatDate(Date.now());
+      document.getElementById('lock-toggle-btn').textContent = '◆ Lock';
+      updateWordCount();
+      isDirty = false;
+      document.getElementById('entry-title').focus();
+    });
+
+    // ── Save ─────────────────────────────────────────────────────────
+    document.getElementById('save-btn').addEventListener('click', saveEntry);
+
+    function saveEntry() {
+      const title = document.getElementById('entry-title').value.trim() || 'Untitled';
+      const body  = document.getElementById('entry-body').value;
+      const mood  = document.getElementById('entry-mood').value;
+
+      if (!body.trim() && !title) return;
+
+      const currentEntry = activeKey ? entries[activeKey] : null;
+      const data = {
+        title, body, mood,
+        updatedAt: Date.now(),
+        locked: currentEntry?.locked || false,
+        pin: currentEntry?.pin || null,
+        createdAt: currentEntry?.createdAt || Date.now(),
+      };
+
+      if (activeKey) {
+        update(ref(db, `${DB_PATH}/${activeKey}`), data);
+      } else {
+        const newRef = push(ref(db, DB_PATH), data);
+        activeKey = newRef.key;
+      }
+      isDirty = false;
+    }
+
+    // ── Discard ──────────────────────────────────────────────────────
+    document.getElementById('discard-btn').addEventListener('click', () => {
+      if (activeKey && entries[activeKey]) {
+        showEditor(entries[activeKey]);
+      } else {
+        showEmpty();
+      }
+    });
+
+    // ── Delete ───────────────────────────────────────────────────────
+    document.getElementById('delete-entry-btn').addEventListener('click', () => {
+      if (!activeKey) { showEmpty(); return; }
+      if (confirm('Delete this entry? It cannot be recovered.')) {
+        remove(ref(db, `${DB_PATH}/${activeKey}`));
+        showEmpty();
+      }
+    });
+
+    // ── Lock toggle ──────────────────────────────────────────────────
+    document.getElementById('lock-toggle-btn').addEventListener('click', () => {
+      if (!activeKey) {
+        alert('Save the entry first, then lock it.');
+        return;
+      }
+      const e = entries[activeKey];
+      if (e?.locked) {
+        // Unlock
+        if (confirm('Remove the lock from this entry?')) {
+          update(ref(db, `${DB_PATH}/${activeKey}`), { locked: false, pin: null });
+          document.getElementById('lock-toggle-btn').textContent = '◆ Lock';
+        }
+      } else {
+        // Show lock modal
+        document.getElementById('pin-input').value = '';
+        document.getElementById('lock-modal').classList.add('show');
+        setTimeout(() => document.getElementById('pin-input').focus(), 100);
+      }
+    });
+
+    document.getElementById('modal-cancel').addEventListener('click', () => {
+      document.getElementById('lock-modal').classList.remove('show');
+    });
+    document.getElementById('modal-confirm').addEventListener('click', confirmLock);
+    document.getElementById('pin-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') confirmLock();
+    });
+
+    function confirmLock() {
+      const pin = document.getElementById('pin-input').value.trim();
+      if (!pin) return;
+      // Save current state first, then lock
+      saveEntry();
+      update(ref(db, `${DB_PATH}/${activeKey}`), { locked: true, pin });
+      document.getElementById('lock-modal').classList.remove('show');
+      document.getElementById('lock-toggle-btn').textContent = '◆ Unlock';
+    }
+
+    // ── Dirty tracking ───────────────────────────────────────────────
+    ['entry-title', 'entry-body', 'entry-mood'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => { isDirty = true; });
+    });
+
+    // ── Word count ───────────────────────────────────────────────────
+    document.getElementById('entry-body').addEventListener('input', updateWordCount);
+    function updateWordCount() {
+      const text = document.getElementById('entry-body').value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      document.getElementById('word-count').textContent = `${words} word${words !== 1 ? 's' : ''}`;
+    }
+
+    // ── Keyboard save ─────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveEntry();
+      }
+    });
+
+    // ── Helpers ──────────────────────────────────────────────────────
+    function formatDate(ts) {
+      if (!ts) return '—';
+      return new Date(ts).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+    }
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

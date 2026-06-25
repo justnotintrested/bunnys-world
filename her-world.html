@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Her World — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(26,12,8,0.55), rgba(13,9,8,0) 80%);
+    }
+    .page-hero h1 { font-size: clamp(2.8rem, 8vw, 6rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.6rem; opacity: 0.7; }
+
+    /* Grid */
+    .world-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 0 2rem 6rem;
+    }
+
+    .world-card {
+      border: 1px solid rgba(201,168,76,0.1);
+      background: rgba(201,168,76,0.02);
+      border-radius: var(--radius);
+      padding: 2rem 1.8rem;
+      text-decoration: none;
+      display: flex; flex-direction: column; gap: 0.6rem;
+      transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .world-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,168,76,0.3), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .world-card:hover { background: rgba(201,168,76,0.05); border-color: rgba(201,168,76,0.25); }
+    .world-card:hover::before { opacity: 1; }
+
+    .card-number {
+      font-family: var(--ff-disp); font-size: 0.65rem;
+      color: var(--gold); opacity: 0.3; letter-spacing: 0.15em;
+    }
+    .card-title {
+      font-family: var(--ff-disp); font-size: 1.3rem;
+      color: var(--cream);
+    }
+    .card-desc {
+      font-size: 0.78rem; color: var(--mist); opacity: 0.55;
+      font-style: italic; line-height: 1.6;
+    }
+    .card-arrow {
+      margin-top: auto; padding-top: 1rem;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.4;
+      transition: opacity 0.2s;
+    }
+    .world-card:hover .card-arrow { opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html" class="active">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.4;">A universe, curated</p>
+    <h1>Her World</h1>
+    <p>everything she is, everything she wants, everything she keeps.</p>
+  </div>
+
+  <div class="world-grid">
+
+    <a href="bucket-list.html" class="world-card">
+      <span class="card-number">I</span>
+      <span class="card-title">Bucket List</span>
+      <span class="card-desc">Things to do, places to go, moments to collect. Organised, tracked, ticked off.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="journal.html" class="world-card">
+      <span class="card-number">II</span>
+      <span class="card-title">Journal</span>
+      <span class="card-desc">A private space. Lock individual entries with a pin. Write freely — nothing is judged here.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="bookshelf.html" class="world-card">
+      <span class="card-number">III</span>
+      <span class="card-title">Bookshelf</span>
+      <span class="card-desc">Read, reading now, want to read — and the smut shelf, naturally. Rate them all.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="shows.html" class="world-card">
+      <span class="card-number">IV</span>
+      <span class="card-title">Shows & Movies</span>
+      <span class="card-desc">The stories that lived in her. Track what she's watching, finished, and still wants to see.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="wishlist.html" class="world-card">
+      <span class="card-number">V</span>
+      <span class="card-title">Wishlist</span>
+      <span class="card-desc">Things to want, things to deserve, things to have someday. Prioritised with links.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="vent.html" class="world-card" style="border-color:rgba(196,30,58,0.1);background:rgba(196,30,58,0.015);">
+      <span class="card-number" style="color:var(--rose);">VI</span>
+      <span class="card-title" style="color:var(--cream);">Vent</span>
+      <span class="card-desc">Say it. All of it. Nothing is saved, nothing is stored. Just you and the page — then let it go.</span>
+      <span class="card-arrow" style="color:var(--rose);">Open →</span>
+    </a>
+
+    <a href="quotes.html" class="world-card">
+      <span class="card-number">VII</span>
+      <span class="card-title">Quotes Vault</span>
+      <span class="card-desc">Lines from books, songs, people — kept like pressed flowers. One surfaces each day.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="dream-board.html" class="world-card">
+      <span class="card-number">VIII</span>
+      <span class="card-title">Dream Board</span>
+      <span class="card-desc">Drag images, words, and thoughts onto a canvas. A private mood board for everything she's becoming.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="color.html" class="world-card">
+      <span class="card-number">IX</span>
+      <span class="card-title">Colour by Number</span>
+      <span class="card-desc">Tiny pixel pictures to colour, one number at a time. Hearts, bunnies, tulips — slow joy.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="tarot.html" class="world-card">
+      <span class="card-number">X</span>
+      <span class="card-title">Daily Card</span>
+      <span class="card-desc">One gothic gold card a day. Flip it — the deck knows what you need to hear.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="wordsearch.html" class="world-card">
+      <span class="card-number">XI</span>
+      <span class="card-title">Word Search</span>
+      <span class="card-desc">Ginju, tifosi, Leclerc, NIFT — your whole world hidden in a grid of letters.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="scratch.html" class="world-card">
+      <span class="card-number">XII</span>
+      <span class="card-title">Scratch Cards</span>
+      <span class="card-desc">Gold foil over little truths. Scratch with your finger — compliments, memories, coupons.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="well.html" class="world-card">
+      <span class="card-number">XIII</span>
+      <span class="card-title">The Wishing Well</span>
+      <span class="card-desc">Whisper a wish, drop a gold coin, watch it sink. The well keeps every secret.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="f1.html" class="world-card" style="border-color:rgba(220,0,0,0.15);background:rgba(220,0,0,0.015);">
+      <span class="card-number" style="color:#DC0000;">XIV</span>
+      <span class="card-title">F1 · Ferrari</span>
+      <span class="card-desc">Live driver & constructor standings, race results. Forever tifosi, forever Ferrari. ❤️</span>
+      <span class="card-arrow" style="color:#DC0000;">Open →</span>
+    </a>
+
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    initGate();
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

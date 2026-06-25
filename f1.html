@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F1 — Ferrari ♦ Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { background:#0d0908; color:#f0e8e0; font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:900px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2.2rem; color:#DC0000; margin-bottom:.2rem; }
+    .subtitle { font-style:italic; color:#a08060; margin-bottom:2.5rem; }
+
+    /* Ferrari red accent */
+    .fer { color:#DC0000; }
+
+    /* Hero banner */
+    .hero-banner {
+      background: linear-gradient(135deg, #1a0404, #0d0908);
+      border:1px solid #DC0000; border-radius:10px;
+      padding:1.5rem 2rem; margin-bottom:2rem;
+      display:flex; align-items:center; gap:2rem; flex-wrap:wrap;
+    }
+    .fer-logo {
+      font-family:'Bodoni Moda',serif; font-size:2.5rem; color:#DC0000;
+      font-weight:600; letter-spacing:.02em;
+    }
+    .hero-tagline { font-style:italic; color:#c9a84c; font-size:1.1rem; }
+    .hero-note { font-size:.85rem; color:#a08060; margin-top:.3rem; }
+
+    /* Tabs */
+    .tabs { display:flex; gap:.4rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .tab { background:none; border:1px solid #2a1a10; color:#a08060; padding:.35rem 1rem; border-radius:4px; cursor:pointer; font-family:inherit; font-size:.95rem; }
+    .tab.active { border-color:#DC0000; color:#DC0000; background:rgba(220,0,0,.05); }
+    .tab:hover:not(.active) { border-color:#c9a84c; color:#c9a84c; }
+
+    /* Standings table */
+    .standings { border:1px solid #2a1a10; border-radius:8px; overflow:hidden; margin-bottom:1.5rem; }
+    .standings-hdr, .standings-row { display:grid; padding:.6rem 1rem; gap:.5rem; }
+    .standings-hdr { background:#1a1008; font-size:.7rem; color:#6a5040; text-transform:uppercase; letter-spacing:.08em; border-bottom:1px solid #2a1a10; }
+    .standings-row { border-bottom:1px solid #1a1008; font-size:.95rem; transition:background .12s; align-items:center; }
+    .standings-row:last-child { border-bottom:none; }
+    .standings-row:hover { background:#1a1008; }
+    .driver-grid { grid-template-columns:40px 1fr 140px 60px; }
+    .constructor-grid { grid-template-columns:40px 1fr 60px; }
+    @media(max-width:540px){ .driver-grid { grid-template-columns:32px 1fr 56px; } .driver-grid .team-name { display:none; } }
+
+    .pos { font-family:'Bodoni Moda',serif; font-size:1.1rem; color:#6a5040; }
+    .pos.p1 { color:#DC0000; }
+    .pos.p2 { color:#c9a84c; }
+    .pos.p3 { color:#a08060; }
+    .driver-name { font-size:1rem; color:#f0e8e0; }
+    .team-name { font-size:.78rem; color:#6a5040; font-style:italic; }
+    .pts { font-family:'Bodoni Moda',serif; font-size:1.1rem; color:#c9a84c; text-align:right; }
+    .fer-row { background:rgba(220,0,0,.05) !important; }
+    .fer-row .driver-name { color:#DC0000; }
+    /* Sam's team — Red Bull blue */
+    .rb-row { background:rgba(54,113,198,.06) !important; }
+    .rb-row .driver-name { color:#3671C6; }
+    .rb-result { color:#3671C6 !important; }
+    .bar.rb { background:#3671C6; }
+
+    /* Bar chart */
+    .bar-wrap { display:flex; align-items:center; gap:.5rem; }
+    .bar { height:4px; background:#DC0000; border-radius:2px; flex-shrink:0; }
+    .bar.other { background:#3a2a10; }
+
+    /* Race results */
+    .race-card { background:#1a1008; border:1px solid #2a1a10; border-radius:8px; padding:1.2rem; margin-bottom:.8rem; }
+    .race-card h3 { font-family:'Bodoni Moda',serif; color:#c9a84c; font-size:1rem; margin:0 0 .6rem; }
+    .race-meta { font-size:.78rem; color:#6a5040; margin-bottom:.8rem; font-style:italic; }
+    .podium { display:flex; gap:1rem; flex-wrap:wrap; }
+    .podium-item { display:flex; flex-direction:column; align-items:center; gap:.2rem; }
+    .podium-pos { font-family:'Bodoni Moda',serif; font-size:1.4rem; color:#c9a84c; }
+    .podium-driver { font-size:.85rem; color:#f0e8e0; }
+    .podium-pts { font-size:.72rem; color:#6a5040; }
+
+    /* Ferrari highlight */
+    .fer-result { color:#DC0000 !important; }
+
+    /* Loading */
+    .loading { text-align:center; padding:3rem; color:#6a5040; font-style:italic; }
+
+    /* Error */
+    .err-msg { background:#1a0808; border:1px solid #3a1010; border-radius:6px; padding:1rem 1.2rem; color:#a05050; font-style:italic; font-size:.9rem; }
+
+    .updated-note { font-size:.72rem; color:#3a2a1a; text-align:center; font-style:italic; margin-top:2rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <h1>❤️ F1 · Ferrari</h1>
+    <p class="subtitle">forever tifosi · forever ferrari ♦</p>
+
+    <div class="hero-banner">
+      <div class="fer-logo">FERRARI</div>
+      <div>
+        <div class="hero-tagline" id="ferPosition">Loading standings…</div>
+        <div class="hero-note" id="ferDrivers">Scuderia Ferrari</div>
+        <div class="hero-note" style="color:#3671C6;margin-top:.5rem;">💙 Sam's team: Red Bull · Max Verstappen</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="drivers">Driver Standings</button>
+      <button class="tab" data-tab="constructors">Constructor Standings</button>
+      <button class="tab" data-tab="races">Recent Races</button>
+    </div>
+
+    <div id="tab-drivers"><div class="loading">Loading driver standings…</div></div>
+    <div id="tab-constructors" style="display:none;"><div class="loading">Loading…</div></div>
+    <div id="tab-races" style="display:none;"><div class="loading">Loading…</div></div>
+
+    <p class="updated-note" id="updatedNote">
+      Data via Jolpica F1 API · auto-refreshes every 5 minutes
+    </p>
+  </div>
+
+  <script type="module">
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const FER_ID = 'ferrari';
+    const RB_ID  = 'red_bull';
+    const VER_ID = 'max_verstappen';
+    const SEASON = new Date().getFullYear();
+    const BASE = `https://api.jolpi.ca/ergast/f1/${SEASON}`;
+
+    async function fetchJSON(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('[id^="tab-"]').forEach(s=>s.style.display='none');
+        tab.classList.add('active');
+        document.getElementById('tab-'+tab.dataset.tab).style.display='';
+      });
+    });
+
+    // Driver standings — Ferrari drivers detected live from the API
+    let ferDriverIds = [];
+    async function loadDrivers() {
+      const container = document.getElementById('tab-drivers');
+      try {
+        const data = await fetchJSON(`${BASE}/driverStandings.json`);
+        const standings = data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings || [];
+        const maxPts = parseFloat(standings[0]?.points || 1);
+
+        // figure out who drives for Ferrari this season
+        const ferDrivers = standings.filter(s => s.Constructors.some(c => c.constructorId === FER_ID));
+        ferDriverIds = ferDrivers.map(s => s.Driver.driverId);
+        if (ferDrivers.length) {
+          document.getElementById('ferDrivers').textContent =
+            'Drivers: ' + ferDrivers.map(s => `${s.Driver.givenName} ${s.Driver.familyName}`).join(' · ');
+        }
+
+        container.innerHTML = `<div class="standings">
+          <div class="standings-hdr driver-grid"><span>Pos</span><span>Driver</span><span class="team-name">Team</span><span>Pts</span></div>
+          ${standings.slice(0,20).map((s,i) => {
+            const isFer = s.Constructors.some(c => c.constructorId === FER_ID);
+            const isVer = s.Driver.driverId === VER_ID;
+            const pct = Math.round(parseFloat(s.points)/maxPts*100);
+            return `<div class="standings-row driver-grid${isFer?' fer-row':isVer?' rb-row':''}">
+              <span class="pos p${i+1}">${s.position}</span>
+              <div>
+                <div class="driver-name">${s.Driver.givenName} ${s.Driver.familyName}${isFer?' ❤️':isVer?' 💙':''}</div>
+                <div class="bar-wrap"><div class="bar${isFer?'':isVer?' rb':' other'}" style="width:${pct}px;max-width:120px;"></div></div>
+              </div>
+              <span class="team-name">${s.Constructors[0]?.name||'—'}</span>
+              <span class="pts">${s.points}</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="err-msg">Couldn't load standings — try again later (API may be rate-limited)</div>`;
+      }
+    }
+
+    // Constructor standings
+    async function loadConstructors() {
+      const container = document.getElementById('tab-constructors');
+      try {
+        const data = await fetchJSON(`${BASE}/constructorStandings.json`);
+        const standings = data.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings || [];
+        const maxPts = parseFloat(standings[0]?.points || 1);
+
+        const fer = standings.find(s => s.Constructor.constructorId === FER_ID);
+        if (fer) {
+          document.getElementById('ferPosition').textContent =
+            `P${fer.position} in Constructors · ${fer.points} pts · ${fer.wins} wins ❤️`;
+        }
+
+        container.innerHTML = `<div class="standings">
+          <div class="standings-hdr constructor-grid"><span>Pos</span><span>Constructor</span><span>Pts</span></div>
+          ${standings.map((s,i) => {
+            const isFer = s.Constructor.constructorId === FER_ID;
+            const isRB  = s.Constructor.constructorId === RB_ID;
+            const pct = Math.round(parseFloat(s.points)/maxPts*100);
+            return `<div class="standings-row constructor-grid${isFer?' fer-row':isRB?' rb-row':''}">
+              <span class="pos p${i+1}">${s.position}</span>
+              <div>
+                <div class="driver-name">${s.Constructor.name}${isFer?' ❤️':isRB?' 💙':''}</div>
+                <div class="bar-wrap"><div class="bar${isFer?'':isRB?' rb':' other'}" style="width:${pct}px;max-width:180px;"></div></div>
+              </div>
+              <span class="pts">${s.points}</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="err-msg">Couldn't load constructor standings.</div>`;
+      }
+    }
+
+    // Recent race results — fetch the LAST completed rounds (API paginates
+    // by driver rows, so a plain results.json only returns the first races)
+    async function loadRaces() {
+      const container = document.getElementById('tab-races');
+      try {
+        const sched = await fetchJSON(`${BASE}/races.json?limit=30`);
+        const allRaces = sched.MRData.RaceTable.Races || [];
+        const now = new Date();
+        const done = allRaces.filter(r => new Date(r.date + 'T23:59:59') < now);
+        if (!done.length) { container.innerHTML='<div class="loading">No races yet this season.</div>'; return; }
+
+        const lastRounds = done.slice(-5).map(r => r.round);
+        const results = await Promise.all(
+          lastRounds.map(rd => fetchJSON(`${BASE}/${rd}/results.json`).catch(() => null))
+        );
+        const races = results
+          .map(d => d?.MRData?.RaceTable?.Races?.[0])
+          .filter(Boolean);
+        if (!races.length) { container.innerHTML='<div class="loading">Results not posted yet.</div>'; return; }
+
+        container.innerHTML = races.reverse().map(race => {
+          const top3 = race.Results?.slice(0,3) || [];
+          const ferResults = race.Results?.filter(r => r.Constructor?.constructorId===FER_ID) || [];
+          return `<div class="race-card">
+            <h3>${race.raceName}</h3>
+            <div class="race-meta">${race.Circuit?.circuitName} · Round ${race.round} · ${race.date}</div>
+            <div class="podium">
+              ${top3.map((r,i) => {
+                const isFer = r.Constructor?.constructorId===FER_ID;
+                const isVer = r.Driver?.driverId===VER_ID;
+                return `<div class="podium-item">
+                  <span class="podium-pos">${['🥇','🥈','🥉'][i]}</span>
+                  <span class="podium-driver${isFer?' fer-result':isVer?' rb-result':''}">${r.Driver.givenName} ${r.Driver.familyName}</span>
+                  <span class="podium-pts">${r.points} pts</span>
+                </div>`;
+              }).join('')}
+            </div>
+            ${ferResults.length ? `<div style="margin-top:.8rem;font-size:.82rem;color:#DC0000;">
+              ❤️ Ferrari: ${ferResults.map(r=>`${r.Driver.familyName} P${r.position} (${r.points}pts)`).join(' · ')}
+            </div>`:''}
+            ${(() => {
+              const ver = race.Results?.find(r => r.Driver?.driverId===VER_ID);
+              return ver ? `<div style="margin-top:.4rem;font-size:.82rem;color:#3671C6;">
+                💙 Sam's man: Verstappen P${ver.position} (${ver.points}pts)
+              </div>` : '';
+            })()}
+          </div>`;
+        }).join('');
+      } catch(e) {
+        container.innerHTML = `<div class="err-msg">Couldn't load race results.</div>`;
+      }
+    }
+
+    // Load all + auto-refresh every 5 minutes
+    function loadAll() {
+      loadDrivers();
+      loadConstructors();
+      loadRaces();
+      const t = new Date();
+      document.getElementById('updatedNote').textContent =
+        `Data via Jolpica F1 API · auto-refreshes every 5 min · last updated ${t.toLocaleTimeString()}`;
+    }
+    loadAll();
+    setInterval(loadAll, 5 * 60 * 1000);
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

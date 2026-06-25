@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scratch Cards — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    :root { --ink:#0d0908; --gold:#c9a84c; --cream:#f0e8e0; --mist:#a08060; }
+    body { color:var(--cream); font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:760px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2rem; color:var(--gold); margin-bottom:.15rem; }
+    .subtitle { font-style:italic; color:var(--mist); margin-bottom:2rem; font-size:.95rem; }
+
+    .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:2.5rem; }
+    .scard {
+      position:relative; aspect-ratio:8/5; border-radius:10px; overflow:hidden;
+      border:1px solid rgba(201,168,76,.3);
+    }
+    .scard-content {
+      position:absolute; inset:0;
+      background:linear-gradient(165deg,#1a1208,#110b07);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:.9rem; gap:.3rem;
+    }
+    .scard-type { font-size:.55rem; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); opacity:.55; }
+    .scard-text { font-style:italic; font-size:.92rem; line-height:1.55; color:var(--cream); }
+    .scard canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; }
+    .scard.revealed canvas { display:none; }
+    .scard.revealed { box-shadow:0 0 18px rgba(201,168,76,.18); }
+
+    .add-form { background:#110b07; border:1px solid #2a1a10; border-radius:8px; padding:1.2rem 1.5rem; }
+    .add-form h3 { font-family:'Bodoni Moda',serif; color:var(--gold); font-size:.9rem; letter-spacing:.08em; margin:0 0 .7rem; }
+    .add-row { display:flex; gap:.6rem; flex-wrap:wrap; }
+    .add-row input, .add-row select { background:#0d0908; border:1px solid #3a2a1a; color:var(--cream); padding:.42rem .7rem; border-radius:4px; font-family:inherit; font-size:.9rem; }
+    .add-row input { flex:1; min-width:200px; }
+    .add-row select option { background:#1a0f0a; }
+    .add-row button { background:var(--gold); border:none; color:#0d0908; padding:.42rem 1.1rem; border-radius:4px; cursor:pointer; font-family:'Bodoni Moda',serif; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+  <div class="page-wrap">
+    <h1>Scratch Cards</h1>
+    <p class="subtitle">gold foil over little truths — scratch with your finger ♦</p>
+
+    <div class="cards" id="cards"></div>
+
+    <div class="add-form">
+      <h3>◆ Slip a new card into the deck</h3>
+      <div class="add-row">
+        <input type="text" id="newText" placeholder="a compliment, a memory, a coupon…" maxlength="120" />
+        <select id="newType">
+          <option value="note">Note</option>
+          <option value="memory">Memory</option>
+          <option value="coupon">Coupon</option>
+        </select>
+        <button id="addBtn">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, onValue, push, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const CFG={apiKey:"AIzaSyAvEc04TFiGuYnDkgPQID9LFaU3Ot1dBnc",authDomain:"anna-birthday-site.firebaseapp.com",databaseURL:"https://anna-birthday-site-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"anna-birthday-site",storageBucket:"anna-birthday-site.firebasestorage.app",messagingSenderId:"972555476285",appId:"1:972555476285:web:5dfd0ac26dd7df9b9f7954"};
+    const app=initializeApp(CFG); const db=getDatabase(app);
+
+    const DEFAULTS={
+      sc1:{type:'note',  text:'You make rooms warmer just by walking into them.'},
+      sc2:{type:'coupon',text:'One free 3am rant — no judgement, no advice unless asked. Redeemable forever.'},
+      sc3:{type:'note',  text:'Your taste is impeccable. In books, in clothes, in teams. Mostly in friends.'},
+      sc4:{type:'coupon',text:'One movie night — your pick, even if it makes me suffer.'},
+      sc5:{type:'memory',text:'Remember: you got through every single thing you thought you wouldn’t.'},
+      sc6:{type:'note',  text:'Ginju thinks you’re the best human alive. Ginju is right.'},
+      sc7:{type:'coupon',text:'One ice-cream run, any hour, any weather.'},
+      sc8:{type:'note',  text:'Twenty-five looks unfairly good on you already.'},
+    };
+
+    let cards={...DEFAULTS}, scratched={};
+
+    onValue(ref(db,'scratch_cards/custom'),s=>{cards={...DEFAULTS,...(s.val()||{})};render();});
+    onValue(ref(db,'scratch_cards/scratched'),s=>{scratched=s.val()||{};render();});
+
+    function render(){
+      const wrap=document.getElementById('cards');
+      wrap.innerHTML='';
+      Object.entries(cards).forEach(([id,c])=>{
+        const card=document.createElement('div');
+        card.className='scard'+(scratched[id]?' revealed':'');
+        card.innerHTML=`
+          <div class="scard-content">
+            <div class="scard-type">${c.type}</div>
+            <div class="scard-text">${c.text}</div>
+          </div>`;
+        if(!scratched[id]){
+          const cv=document.createElement('canvas');
+          card.appendChild(cv);
+          requestAnimationFrame(()=>initFoil(cv,id));
+        }
+        wrap.appendChild(card);
+      });
+    }
+
+    function initFoil(cv,id){
+      const r=cv.getBoundingClientRect();
+      cv.width=r.width*devicePixelRatio; cv.height=r.height*devicePixelRatio;
+      const g=cv.getContext('2d');
+      g.scale(devicePixelRatio,devicePixelRatio);
+      // gold foil
+      const grad=g.createLinearGradient(0,0,r.width,r.height);
+      grad.addColorStop(0,'#a8853a'); grad.addColorStop(.45,'#e0c060');
+      grad.addColorStop(.55,'#c9a84c'); grad.addColorStop(1,'#8a6a28');
+      g.fillStyle=grad; g.fillRect(0,0,r.width,r.height);
+      // speckle
+      g.globalAlpha=.18;
+      for(let i=0;i<160;i++){
+        g.fillStyle=Math.random()>.5?'#fff':'#5a4010';
+        g.fillRect(Math.random()*r.width,Math.random()*r.height,1.5,1.5);
+      }
+      g.globalAlpha=1;
+      g.fillStyle='rgba(13,9,8,.45)';
+      g.font='italic 13px Cormorant Garamond, serif';
+      g.textAlign='center';
+      g.fillText('scratch me ♦', r.width/2, r.height/2+4);
+
+      let down=false, cleared=0;
+      const total=r.width*r.height;
+      function scratch(e){
+        const rect=cv.getBoundingClientRect();
+        const x=e.clientX-rect.left, y=e.clientY-rect.top;
+        g.globalCompositeOperation='destination-out';
+        g.fillStyle='#000';
+        g.beginPath(); g.arc(x,y,16,0,Math.PI*2); g.fill();
+        g.globalCompositeOperation='source-over';
+      }
+      function checkDone(){
+        const d=g.getImageData(0,0,cv.width,cv.height).data;
+        let clear=0;
+        for(let i=3;i<d.length;i+=64)if(d[i]===0)clear++;
+        if(clear/(d.length/64)>.55){
+          set(ref(db,'scratch_cards/scratched/'+id),true);
+        }
+      }
+      cv.addEventListener('pointerdown',e=>{
+        down=true;
+        try{cv.setPointerCapture(e.pointerId);}catch{}
+        scratch(e);
+      });
+      cv.addEventListener('pointermove',e=>{if(down)scratch(e);});
+      const stop=()=>{if(down){down=false;checkDone();}};
+      cv.addEventListener('pointerup',stop);
+      cv.addEventListener('pointercancel',stop);
+      addEventListener('pointerup',stop);
+    }
+
+    document.getElementById('addBtn').onclick=()=>{
+      const text=document.getElementById('newText').value.trim();
+      if(!text)return;
+      push(ref(db,'scratch_cards/custom'),{type:document.getElementById('newType').value,text});
+      document.getElementById('newText').value='';
+    };
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

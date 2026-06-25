@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Wishing Well — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    :root { --ink:#0d0908; --gold:#c9a84c; --cream:#f0e8e0; --mist:#a08060; }
+    body { color:var(--cream); font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:640px; margin:0 auto; padding:2rem 1.5rem 5rem; text-align:center; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2rem; color:var(--gold); margin-bottom:.15rem; }
+    .subtitle { font-style:italic; color:var(--mist); margin-bottom:1.6rem; font-size:.95rem; }
+
+    #wellCanvas {
+      width:100%; height:min(46vh,420px); display:block;
+      border-radius:12px; border:1px solid rgba(201,168,76,.2);
+      background:radial-gradient(ellipse 70% 60% at 50% 30%, #16100c, #0a0806);
+    }
+
+    .wish-form { margin-top:1.4rem; }
+    .wish-input {
+      width:100%; box-sizing:border-box;
+      background:rgba(255,255,255,.02); border:none; border-bottom:1px solid rgba(201,168,76,.35);
+      padding:.7rem .4rem; color:var(--cream); text-align:center;
+      font-family:inherit; font-size:1.05rem; font-style:italic; outline:none;
+      transition:border-color .3s;
+    }
+    .wish-input:focus { border-color:var(--gold); }
+    .wish-input::placeholder { color:var(--mist); opacity:.4; }
+    .drop-btn {
+      margin-top:1.1rem;
+      background:var(--gold); border:none; color:#0d0908;
+      padding:.5rem 1.5rem; border-radius:4px; cursor:pointer;
+      font-family:'Bodoni Moda',serif; letter-spacing:.06em; font-size:.95rem;
+      transition:opacity .3s;
+    }
+    .drop-btn:disabled { opacity:.35; cursor:default; }
+    .well-note { margin-top:1.3rem; font-size:.82rem; color:var(--mist); font-style:italic; opacity:.7; }
+    .well-note strong { color:var(--gold); font-style:normal; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+  <div class="page-wrap">
+    <h1>The Wishing Well</h1>
+    <p class="subtitle">whisper it to the water — the well keeps every secret ♦</p>
+
+    <canvas id="wellCanvas"></canvas>
+
+    <div class="wish-form">
+      <input class="wish-input" id="wishText" type="text" maxlength="160" placeholder="make a wish…" />
+      <br/>
+      <button class="drop-btn" id="dropBtn">Drop a coin ◆</button>
+    </div>
+
+    <p class="well-note" id="wellNote"></p>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, push, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const CFG={apiKey:"AIzaSyAvEc04TFiGuYnDkgPQID9LFaU3Ot1dBnc",authDomain:"anna-birthday-site.firebaseapp.com",databaseURL:"https://anna-birthday-site-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"anna-birthday-site",storageBucket:"anna-birthday-site.firebasestorage.app",messagingSenderId:"972555476285",appId:"1:972555476285:web:5dfd0ac26dd7df9b9f7954"};
+    const app=initializeApp(CFG); const db=getDatabase(app);
+
+    // wish count
+    function refreshCount(){
+      get(ref(db,'wishes')).then(s=>{
+        const n=s.exists()?Object.keys(s.val()).length:0;
+        document.getElementById('wellNote').innerHTML=
+          n?`<strong>${n}</strong> wish${n!==1?'es':''} rest below the water — no one can read them, not even you ♦`
+           :'the water is still — be the first to wish ♦';
+      });
+    }
+    refreshCount();
+
+    // ── Three.js well ──────────────────────────────────────────────
+    const canvas=document.getElementById('wellCanvas');
+    const isMobile=matchMedia('(max-width:600px)').matches;
+    const renderer=new THREE.WebGLRenderer({canvas,antialias:!isMobile,alpha:true});
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(46,1,.1,60);
+    camera.position.set(0,5.2,7.6);
+    camera.lookAt(0,0,0);
+
+    function size(){
+      renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+      renderer.setPixelRatio(Math.min(devicePixelRatio,isMobile?1.5:2));
+      camera.aspect=canvas.clientWidth/canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+    size(); addEventListener('resize',size);
+
+    scene.add(new THREE.AmbientLight(0x405060,1.4));
+    const lamp=new THREE.PointLight(0xc9a84c,30,18); lamp.position.set(0,4.4,2); scene.add(lamp);
+    const moon=new THREE.DirectionalLight(0x8aa4c4,.8); moon.position.set(-5,8,3); scene.add(moon);
+
+    // stone ring
+    const stoneMat=new THREE.MeshStandardMaterial({color:0x3a322c,roughness:.95});
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(2.6,.55,10,28),stoneMat);
+    ring.rotation.x=Math.PI/2; ring.position.y=.4; scene.add(ring);
+    // stones texture illusion: bumps
+    for(let i=0;i<14;i++){
+      const a=i/14*Math.PI*2;
+      const s=new THREE.Mesh(new THREE.SphereGeometry(.34,6,5),stoneMat);
+      s.position.set(Math.cos(a)*2.6,.72,Math.sin(a)*2.6);
+      s.scale.y=.6; scene.add(s);
+    }
+
+    // water — displaced disc
+    const waterGeo=new THREE.CircleGeometry(2.15,52,0,Math.PI*2);
+    const waterMat=new THREE.MeshStandardMaterial({
+      color:0x10222c, roughness:.18, metalness:.7,
+      emissive:0x04141c,
+    });
+    const water=new THREE.Mesh(waterGeo,waterMat);
+    water.rotation.x=-Math.PI/2; water.position.y=.22; scene.add(water);
+    const basePos=waterGeo.attributes.position.array.slice();
+
+    // ripples: list of {r, life}
+    const ripples=[];
+
+    // gold coin
+    const coin=new THREE.Mesh(
+      new THREE.CylinderGeometry(.22,.22,.05,18),
+      new THREE.MeshStandardMaterial({color:0xc9a84c,metalness:.9,roughness:.25,emissive:0x4a3810})
+    );
+    coin.visible=false; scene.add(coin);
+    let coinAnim=null;
+
+    function dropCoin(){
+      coin.visible=true;
+      coinAnim={t:0};
+    }
+
+    // sparkles under water (past wishes glinting)
+    const glints=new THREE.Group();
+    for(let i=0;i<26;i++){
+      const g=new THREE.Mesh(
+        new THREE.SphereGeometry(.03,4,4),
+        new THREE.MeshBasicMaterial({color:0xc9a84c,transparent:true,opacity:.5})
+      );
+      const r=Math.random()*1.8, a=Math.random()*Math.PI*2;
+      g.position.set(Math.cos(a)*r,-.4-Math.random()*.8,Math.sin(a)*r);
+      glints.add(g);
+    }
+    scene.add(glints);
+
+    const clock=new THREE.Clock();
+    let running=true;
+    document.addEventListener('visibilitychange',()=>running=!document.hidden);
+
+    function tick(){
+      requestAnimationFrame(tick);
+      if(!running)return;
+      const t=clock.getElapsedTime();
+
+      // ambient water motion + ripples
+      const pos=waterGeo.attributes.position;
+      for(let i=0;i<pos.count;i++){
+        const x=basePos[i*3], y=basePos[i*3+1];
+        const d=Math.sqrt(x*x+y*y);
+        let z=Math.sin(d*4-t*1.6)*.018+Math.sin(x*3+t)*.012;
+        ripples.forEach(rp=>{
+          const wave=Math.sin((d-rp.r)*9);
+          const env=Math.exp(-Math.abs(d-rp.r)*4)*Math.exp(-rp.life*1.2);
+          z+=wave*env*.12;
+        });
+        pos.setZ(i,z);
+      }
+      pos.needsUpdate=true;
+      waterGeo.computeVertexNormals();
+
+      for(let i=ripples.length-1;i>=0;i--){
+        ripples[i].r+=.025; ripples[i].life+=.016;
+        if(ripples[i].life>2.4)ripples.splice(i,1);
+      }
+
+      // coin drop animation
+      if(coinAnim){
+        coinAnim.t+=.016;
+        const ct=coinAnim.t;
+        if(ct<1){           // falling
+          coin.position.set(0,3.6-ct*ct*3.4,0);
+          coin.rotation.x+=.18; coin.rotation.z+=.07;
+        }else if(ct<1.05){  // splash
+          ripples.push({r:0,life:0});
+          plink();
+        }else if(ct<2.4){   // sinking
+          coin.position.y=.2-(ct-1.05)*.9;
+          coin.material.opacity=1-(ct-1.05)/1.35;
+          coin.material.transparent=true;
+          coin.rotation.x+=.04;
+        }else{
+          coin.visible=false; coin.material.opacity=1; coinAnim=null;
+        }
+      }
+
+      glints.children.forEach((g,i)=>{
+        g.material.opacity=.25+Math.abs(Math.sin(t*1.4+i*2.1))*.45;
+      });
+      lamp.intensity=27+Math.sin(t*2.2)*4;
+
+      renderer.render(scene,camera);
+    }
+    tick();
+
+    // soft water plink
+    function plink(){
+      try{
+        const ac=plink.ac||(plink.ac=new (window.AudioContext||window.webkitAudioContext)());
+        const o=ac.createOscillator(), g=ac.createGain();
+        o.type='sine';
+        o.frequency.setValueAtTime(880,ac.currentTime);
+        o.frequency.exponentialRampToValueAtTime(320,ac.currentTime+.25);
+        g.gain.setValueAtTime(.0001,ac.currentTime);
+        g.gain.exponentialRampToValueAtTime(.18,ac.currentTime+.02);
+        g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.5);
+        o.connect(g); g.connect(ac.destination);
+        o.start(); o.stop(ac.currentTime+.55);
+      }catch{}
+    }
+
+    // ── make a wish ────────────────────────────────────────────────
+    const btn=document.getElementById('dropBtn');
+    btn.onclick=()=>{
+      const text=document.getElementById('wishText').value.trim();
+      if(!text){document.getElementById('wishText').focus();return;}
+      push(ref(db,'wishes'),{text,ts:Date.now()});
+      document.getElementById('wishText').value='';
+      btn.disabled=true;
+      dropCoin();
+      setTimeout(()=>{btn.disabled=false;refreshCount();},2600);
+    };
+    document.getElementById('wishText').addEventListener('keydown',e=>{
+      if(e.key==='Enter')btn.click();
+    });
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

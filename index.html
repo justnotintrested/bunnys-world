@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    /* ── Page-specific styles ───────────────────────────────────── */
+
+    /* Hero */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 7rem 2rem 5rem;
+      position: relative;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(28,10,8,0.5) 0%, rgba(13,9,8,0) 75%);
+    }
+    #hero::before, #hero::after {
+      content: '';
+      position: absolute;
+      width: 80px; height: 80px;
+      border-color: rgba(201,168,76,0.15);
+      border-style: solid; pointer-events: none;
+    }
+    #hero::before { top: 5.5rem; left: 2rem; border-width: 1px 0 0 1px; }
+    #hero::after  { bottom: 3rem; right: 2rem; border-width: 0 1px 1px 0; }
+
+    .hero-eyebrow {
+      font-size: 0.6rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold);
+      opacity: 0.7; margin-bottom: 1rem;
+    }
+    .hero-welcome {
+      font-style: italic; font-size: 1.2rem;
+      color: var(--mist); margin-bottom: 0.2rem;
+    }
+    .hero-title {
+      font-family: var(--ff-disp);
+      font-size: clamp(4.5rem, 13vw, 10rem);
+      font-weight: 700; line-height: 0.88;
+      color: var(--gold);
+      text-shadow: 0 0 100px rgba(201,168,76,0.12);
+      margin-bottom: 1.5rem;
+      cursor: default;
+    }
+    .hero-title:hover { text-shadow: 0 0 120px rgba(201,168,76,0.25); transition: text-shadow 0.5s; }
+
+    .hero-portrait {
+      width: min(260px, 68vw);
+      height: min(340px, 85vw);
+      object-fit: cover;
+      object-position: center 15%;
+      border: 1px solid rgba(201,168,76,0.2);
+      display: block; margin: 0 auto 2rem;
+      filter: sepia(0.12) contrast(1.05);
+    }
+    .hero-tagline {
+      font-size: 1.05rem; color: var(--mist);
+      max-width: 440px; margin: 0 auto 1.2rem;
+      line-height: 1.9;
+    }
+    .hero-motto {
+      font-style: italic; font-size: 1.35rem;
+      color: var(--gold); cursor: pointer;
+      transition: opacity 0.3s;
+    }
+    .hero-motto:hover { opacity: 0.7; }
+
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.58rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--mist);
+      opacity: 0.35; animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:0.2} 50%{opacity:0.5} }
+
+    /* Rumi ambient text */
+    .rumi-ambient {
+      text-align: center; padding: 5rem 2rem;
+      background: linear-gradient(to bottom, rgba(13,9,8,0) 0%, rgba(19,11,9,0.5) 50%, rgba(13,9,8,0) 100%);
+    }
+    .rumi-quote {
+      font-family: var(--ff-serif);
+      font-style: italic; font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+      color: var(--mist); opacity: 0.5;
+      max-width: 640px; margin: 0 auto;
+      line-height: 1.9; transition: opacity 1s ease;
+    }
+    .rumi-attribution {
+      font-size: 0.62rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--gold);
+      opacity: 0.4; margin-top: 1.2rem; display: block;
+    }
+
+    /* Countdown */
+    #countdown {
+      padding: 6rem 2rem; text-align: center;
+    }
+    .cd-label-top {
+      font-size: 0.6rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.55;
+      margin-bottom: 1.5rem;
+    }
+    .cd-heading {
+      font-family: var(--ff-disp);
+      font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+      font-weight: 400; color: var(--cream);
+      margin-bottom: 1rem;
+    }
+    .cd-grid {
+      display: flex; justify-content: center;
+      align-items: flex-start; gap: 0.4rem;
+      margin: 2.5rem 0;
+    }
+    .cd-unit { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
+    .cd-num {
+      font-family: var(--ff-disp);
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      font-weight: 700; color: var(--gold); line-height: 1;
+      text-shadow: 0 0 40px rgba(201,168,76,0.18);
+    }
+    .cd-sep {
+      font-family: var(--ff-disp);
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      color: var(--gold-dim); line-height: 1; opacity: 0.35;
+      padding-top: 0.03em;
+    }
+    .cd-unit-label {
+      font-size: 0.55rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--mist);
+      margin-top: 0.4rem; opacity: 0.5;
+    }
+    .cd-sub {
+      font-style: italic; font-size: 0.95rem;
+      color: var(--mist); opacity: 0.6;
+      max-width: 440px; margin: 0 auto;
+    }
+
+    /* Daily compliment strip */
+    .daily-compliment-strip {
+      background: rgba(201,168,76,0.04);
+      border-top: 1px solid rgba(201,168,76,0.1);
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+      padding: 2rem;
+      text-align: center;
+    }
+    .dcs-label {
+      font-size: 0.58rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.5;
+      margin-bottom: 0.8rem;
+    }
+    .dcs-text {
+      font-style: italic; font-size: 1.1rem;
+      color: var(--cream); max-width: 580px; margin: 0 auto;
+      line-height: 1.85;
+    }
+
+    /* Letter */
+    #letter { padding: 6rem 2rem; }
+    .letter-wrap {
+      max-width: 660px; margin: 0 auto;
+    }
+    .letter-eyebrow {
+      font-size: 0.6rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold);
+      opacity: 0.55; text-align: center; margin-bottom: 3rem;
+    }
+    .letter-body {
+      font-size: 1.12rem; line-height: 2;
+      color: var(--cream); font-weight: 300;
+    }
+    .letter-body p + p { margin-top: 1.5em; }
+    .letter-sign {
+      margin-top: 3rem; font-style: italic;
+      font-size: 1.4rem; color: var(--gold); text-align: center;
+    }
+
+    /* Index tiles */
+    .index-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1px; margin: 4rem 0 0;
+      border: 1px solid rgba(201,168,76,0.1);
+    }
+    .index-tile {
+      padding: 2rem 1.5rem;
+      background: rgba(201,168,76,0.025);
+      border: 1px solid rgba(201,168,76,0.07);
+      transition: background var(--transition);
+      text-decoration: none; color: inherit; display: block;
+    }
+    .index-tile:hover { background: rgba(201,168,76,0.06); }
+    .tile-num {
+      font-family: var(--ff-disp); font-style: italic;
+      font-size: 1.1rem; color: var(--gold); opacity: 0.65;
+      margin-bottom: 0.5rem;
+    }
+    .tile-title {
+      font-family: var(--ff-disp); font-size: 0.95rem;
+      font-weight: 700; color: var(--cream); margin-bottom: 0.2rem;
+    }
+    .tile-sub {
+      font-size: 0.65rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.55;
+    }
+
+    /* Gallery */
+    #gallery { padding: 6rem 2rem; background: var(--ink-soft); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 300px;
+      gap: 3px; max-width: 1100px; margin: 0 auto;
+    }
+    .gallery-grid .g-wide { grid-column: span 2; }
+    .g-photo {
+      position: relative; overflow: hidden; background: #111;
+    }
+    .g-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: sepia(0.08) contrast(1.04);
+      transition: transform 0.7s ease, filter 0.5s ease;
+      display: block;
+    }
+    .g-photo:hover img { transform: scale(1.04); filter: sepia(0) contrast(1.08); }
+    .g-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 1rem 0.9rem 0.7rem;
+      background: linear-gradient(transparent, rgba(13,9,8,0.85));
+      font-size: 0.65rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--mist);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .g-photo:hover .g-caption { opacity: 1; }
+
+    /* Messages */
+    #messages { padding: 6rem 2rem; }
+    .messages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2px; margin-top: 3rem;
+      max-width: 1000px; margin-left: auto; margin-right: auto;
+    }
+    .msg-card {
+      border: 1px solid rgba(201,168,76,0.1);
+      padding: 2.5rem 2rem;
+      background: rgba(201,168,76,0.02);
+      position: relative;
+    }
+    .msg-card::before {
+      content: '"';
+      position: absolute; top: 0.8rem; left: 1.3rem;
+      font-family: var(--ff-disp); font-size: 3.5rem;
+      color: var(--gold); opacity: 0.1; line-height: 1;
+    }
+    .msg-text {
+      font-style: italic; font-size: 1rem;
+      line-height: 1.85; color: var(--cream);
+      opacity: 0.82; margin-bottom: 1.5rem;
+    }
+    .msg-from {
+      font-size: 0.6rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.6;
+    }
+
+    @media (max-width: 768px) {
+      .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 200px; }
+      .gallery-grid .g-wide { grid-column: span 2; }
+    }
+    @media (max-width: 480px) {
+      .gallery-grid { grid-template-columns: 1fr; grid-auto-rows: 240px; }
+      .gallery-grid .g-wide { grid-column: span 1; }
+      .cd-unit { min-width: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────── -->
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Hero ─────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div>
+      <p class="hero-eyebrow reveal">Est. 13 · 07 · 2001 &nbsp;—&nbsp; A Cancer born with wings</p>
+      <p class="hero-welcome reveal">Welcome to</p>
+      <h1 class="hero-title reveal" id="hero-title-trigger">Bunny's<br>World</h1>
+      <span class="ornament reveal" style="font-size:1rem;margin:1rem 0;">◆</span>
+      <img
+        class="hero-portrait reveal"
+        src="assets/images/anna/WhatsApp Image 2026-05-19 at 12.46.25 PM.jpeg"
+        alt="Anna"
+        id="hero-portrait-trigger"
+      />
+      <p class="hero-tagline reveal">
+        For Anna — on the eve of her twenty-fifth turning.<br>
+        A small, dim-lit room of memory and devotion,<br>kept for the girl they call Bunny.
+      </p>
+      <p class="hero-motto reveal" id="motto-trigger">"born with wings"</p>
+    </div>
+    <p class="hero-scroll">Scroll</p>
+  </section>
+
+  <!-- ── Rumi ambient ──────────────────────────────────────────── -->
+  <div class="rumi-ambient reveal">
+    <p class="rumi-quote" id="rumi-text"></p>
+    <span class="rumi-attribution">— Rumi</span>
+  </div>
+
+  <!-- ── Daily Compliment Strip ────────────────────────────────── -->
+  <div class="daily-compliment-strip reveal">
+    <p class="dcs-label">For you, today</p>
+    <p class="dcs-text" id="daily-compliment-text"></p>
+  </div>
+
+  <!-- ── Countdown ─────────────────────────────────────────────── -->
+  <section id="countdown">
+    <p class="cd-label-top reveal">The candle is not yet lit</p>
+    <h2 class="cd-heading reveal">
+      Until she turns <span class="gold italic">twenty five</span>
+    </h2>
+    <p class="italic mist reveal" style="font-size:0.85rem;opacity:0.5;margin-top:-0.5rem;">
+      and Ginju and Anna take over the world
+    </p>
+    <span class="ornament reveal">◆</span>
+    <div class="cd-grid reveal">
+      <div class="cd-unit"><span class="cd-num" id="cd-days">--</span><span class="cd-unit-label">Days</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit"><span class="cd-num" id="cd-hours">--</span><span class="cd-unit-label">Hours</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit"><span class="cd-num" id="cd-mins">--</span><span class="cd-unit-label">Minutes</span></div>
+      <span class="cd-sep">:</span>
+      <div class="cd-unit"><span class="cd-num" id="cd-secs">--</span><span class="cd-unit-label">Seconds</span></div>
+    </div>
+    <p class="cd-sub reveal italic">
+      Counting down to the thirteenth of July —<br>
+      the night her world turns a year softer.
+    </p>
+  </section>
+
+  <!-- ── Letter ────────────────────────────────────────────────── -->
+  <section id="letter">
+    <div class="letter-wrap">
+      <p class="letter-eyebrow reveal">A letter, by candlelight</p>
+      <div class="letter-body reveal">
+        <p>Hey Bunny.</p>
+        <p>
+          If you're reading this, then it's almost time — or it already is. Either way, hello.
+          I've been meaning to say all of this for a while, but somehow words always end up smaller than feelings.
+          So I built you a room instead.
+        </p>
+        <p>
+          You are one of those people who doesn't quite know how <strong>uncommon</strong> you are.
+          You feel things in full — not in half-measures, not with disclaimers.
+          The world handed you hard months and you came out of them with your chin up and your nails done.
+          Very Cancer of you. Very <em>you</em>.
+        </p>
+        <p>
+          NIFT wasn't just a degree. It was proof — that the girl who dreamed in fabric and colour
+          had the discipline to match the vision. You made something of it.
+          You are still making something of it.
+        </p>
+        <p>
+          Ginju picked the right person. Animals know.
+        </p>
+        <p>
+          So here is a small dark room of a website, lit just for you.
+          Crimson and gold, because that's how your world has always been coloured.
+          Stay exactly as soft and as fierce as you are.
+        </p>
+        <p style="margin-top:2rem;font-size:0.8rem;color:var(--mist);opacity:0.5;font-style:italic;">
+          [ Sam's real letter goes here — this is a placeholder ]
+        </p>
+      </div>
+      <p class="letter-sign reveal">You were, after all, born with wings.</p>
+      <span class="rule reveal"></span>
+
+      <!-- Index tiles -->
+      <div class="index-grid reveal">
+        <a href="cancer-corner.html" class="index-tile">
+          <p class="tile-num">I</p>
+          <p class="tile-title">Cancer</p>
+          <p class="tile-sub">Moon-soft, deep-feeling</p>
+        </a>
+        <a href="her-world.html#books" class="index-tile">
+          <p class="tile-num">II</p>
+          <p class="tile-title">NIFT</p>
+          <p class="tile-sub">Fashion graduate &amp; maker</p>
+        </a>
+        <a href="her-world.html#books" class="index-tile">
+          <p class="tile-num">III</p>
+          <p class="tile-title">Books &amp; Music</p>
+          <p class="tile-sub">Always something playing</p>
+        </a>
+        <a href="ginju.html" class="index-tile">
+          <p class="tile-num">IV</p>
+          <p class="tile-title">Ginju</p>
+          <p class="tile-sub">Her cat, her shadow</p>
+        </a>
+        <a href="her-world.html#f1" class="index-tile">
+          <p class="tile-num">V</p>
+          <p class="tile-title">McLaren</p>
+          <p class="tile-sub">Papaya &amp; Carbon Black</p>
+        </a>
+        <a href="you-are.html" class="index-tile">
+          <p class="tile-num">VI</p>
+          <p class="tile-title">You Are</p>
+          <p class="tile-sub">A story no one else could write</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Gallery removed ──────────────────────────────────────── -->
+  <section id="gallery" style="display:none;">
+    <div class="gallery-grid">
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-04-23 at 8.54.39 PM.jpeg"
+             alt="Black dress" style="object-position:center 20%;" />
+        <p class="g-caption">She Arrives</p>
+      </div>
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-17 at 10.42.50 PM.jpeg"
+             alt="Moschino" style="object-position:center 10%;" />
+        <p class="g-caption">Moschino Edit</p>
+      </div>
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-19 at 12.46.25 PM.jpeg"
+             alt="Festival" style="object-position:center 15%;" />
+        <p class="g-caption">Festival Edit</p>
+      </div>
+      <div class="g-photo g-wide reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-19 at 5.20.49 AM.jpeg"
+             alt="NIFT Graduation" style="object-position:center 30%;" />
+        <p class="g-caption">NIFT Graduation Day ✦</p>
+      </div>
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-24 at 12.29.20 PM.jpeg"
+             alt="Red lips" style="object-position:center 10%;" />
+        <p class="g-caption">Red Lips</p>
+      </div>
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-19 at 5.41.22 AM.jpeg"
+             alt="Back glance" style="object-position:center 5%;" />
+        <p class="g-caption">Over the Shoulder</p>
+      </div>
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-19 at 5.42.22 AM.jpeg"
+             alt="Burgundy" style="object-position:center 15%;" />
+        <p class="g-caption">Burgundy Era</p>
+      </div>
+      <div class="g-photo reveal">
+        <img src="assets/images/anna/WhatsApp Image 2026-05-22 at 3.17.23 PM.jpeg"
+             alt="Angel cami" style="object-position:center 20%;" />
+        <p class="g-caption">Angel</p>
+      </div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1676959298_3042877601127718000_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1684341598_3104804817561978616_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1659282057_2894590153667621922_45654788098.webp" alt="" /></div>
+      <div class="g-photo g-wide reveal"><img src="assets/images/anna/_lolabeinglola__1681797010_3083459267748374064_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1674193072_3019672815532455055_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1691066372_3161216311107230912_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1663398510_2929121463376490643_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1691066372_3161216310947801328_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1662522117_2921769744099383771_45654788098.webp" alt="" /></div>
+      <div class="g-photo g-wide reveal"><img src="assets/images/anna/_lolabeinglola__1737386879_3549780884369150794_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1664948400_2942122880940655424_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1663782293_2932340867329317950_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1668015465_2967851289464357408_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1662522117_2921769743747055369_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1663398510_2929121463728800094_45654788098.webp" alt="" /></div>
+      <div class="g-photo g-wide reveal"><img src="assets/images/anna/_annaverse__1666880073_2958326933043339333_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1657739402_2881649426110444539_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1662522117_2921769743747061264_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1693039792_3177770556368124949_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1668015465_2967851289321734856_52747322615.webp" alt="" /></div>
+      <div class="g-photo g-wide reveal"><img src="assets/images/anna/_lolabeinglola__1694870722_3193129512921742132_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1695550797_3198834396958294039_52747322615.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1668860431_2974939380788437445_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_annaverse__1693039792_3177770556359927913_45654788098.webp" alt="" /></div>
+      <div class="g-photo reveal"><img src="assets/images/anna/_lolabeinglola__1735663373_3535323070917602500_52747322615.webp" alt="" /></div>
+    </div>
+  </section>
+
+  <!-- Notes removed -->
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p class="footer-logo">Bunny's World</p>
+    <p>Made with love &nbsp;·&nbsp; July 13, 2026 &nbsp;·&nbsp; For Anna</p>
+  </footer>
+
+  <!-- ── Compliment toast container ───────────────────────────── -->
+  <div id="compliment-toast">
+    <span class="toast-text"></span>
+    <span class="toast-close">close ×</span>
+  </div>
+
+  <!-- ── Scripts ───────────────────────────────────────────────── -->
+  <script type="module">
+    import { initGate, showCompliment, addComplimentTrigger } from './js/gate.js';
+    import { getDailyCompliment, getRandomCompliment } from './js/compliments.js';
+
+    // ── Gate ────────────────────────────────────────────────────
+    initGate();
+
+    // ── Daily compliment strip ──────────────────────────────────
+    document.getElementById('daily-compliment-text').textContent = getDailyCompliment();
+
+    // ── Rumi quotes ─────────────────────────────────────────────
+    const rumiQuotes = [
+      "Out beyond ideas of wrongdoing and rightdoing, there is a field. I'll meet you there.",
+      "The wound is the place where the Light enters you.",
+      "You were born with wings, why prefer to crawl through life?",
+      "Let yourself be silently drawn by the strange pull of what you really love.",
+      "Yesterday I was clever, so I wanted to change the world. Today I am wise, so I am changing myself.",
+      "Raise your words, not your voice. It is rain that grows flowers, not thunder.",
+      "What you seek is seeking you.",
+      "Be empty of worrying. Think of who created thought.",
+      "Sell your cleverness and buy bewilderment.",
+    ];
+    const rumiEl = document.getElementById('rumi-text');
+    let rumiIdx  = Math.floor(Math.random() * rumiQuotes.length);
+    rumiEl.textContent = rumiQuotes[rumiIdx];
+    setInterval(() => {
+      rumiEl.style.opacity = 0;
+      setTimeout(() => {
+        rumiIdx = (rumiIdx + 1) % rumiQuotes.length;
+        rumiEl.textContent = rumiQuotes[rumiIdx];
+        rumiEl.style.opacity = 0.5;
+      }, 1000);
+    }, 8000);
+
+    // ── Countdown ───────────────────────────────────────────────
+    function updateCD() {
+      const target = new Date('2026-07-13T00:00:00+05:30');
+      const diff   = target - Date.now();
+      if (diff <= 0) {
+        ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id =>
+          document.getElementById(id).textContent = '00');
+        document.querySelector('.cd-heading').innerHTML =
+          '<span class="gold italic">Happy Birthday, Bunny. ✦</span>';
+        return;
+      }
+      const pad = n => String(n).padStart(2,'0');
+      document.getElementById('cd-days').textContent  = pad(Math.floor(diff/86400000));
+      document.getElementById('cd-hours').textContent = pad(Math.floor(diff%86400000/3600000));
+      document.getElementById('cd-mins').textContent  = pad(Math.floor(diff%3600000/60000));
+      document.getElementById('cd-secs').textContent  = pad(Math.floor(diff%60000/1000));
+    }
+    updateCD();
+    setInterval(updateCD, 1000);
+
+    // ── Compliment triggers ─────────────────────────────────────
+    addComplimentTrigger('#motto-trigger');
+    addComplimentTrigger('#hero-title-trigger',
+      "There is no one else who could be you. That sentence sounds simple but it means everything.");
+    addComplimentTrigger('#hero-portrait-trigger',
+      "The way you love things — fully, without apology — is one of the most beautiful things about you.");
+
+    // ── Toast close button ──────────────────────────────────────
+    document.querySelector('.toast-close')?.addEventListener('click', () => {
+      document.getElementById('compliment-toast').classList.remove('show');
+    });
+
+    // ── Scroll reveal ───────────────────────────────────────────
+    function checkReveal() {
+      document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.93)
+          el.classList.add('visible');
+      });
+    }
+    window.addEventListener('scroll', checkReveal, { passive: true });
+    checkReveal();
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

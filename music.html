@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Her Playlist — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { background:#0d0908; color:#f0e8e0; font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:700px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2.2rem; color:#c9a84c; margin-bottom:.2rem; }
+    .subtitle { font-style:italic; color:#a08060; margin-bottom:3rem; }
+
+    /* Player */
+    .player { background:#110b07; border:1px solid #2a1a10; border-radius:12px; overflow:hidden; margin-bottom:2rem; }
+
+    .player-display {
+      position:relative; background:#0a0605;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:2.5rem 2rem 1.5rem; text-align:center; min-height:260px;
+    }
+
+    /* Vinyl record */
+    .vinyl { position:relative; width:160px; height:160px; margin-bottom:1.5rem; }
+    .vinyl-disc {
+      width:160px; height:160px; border-radius:50%;
+      background: conic-gradient(
+        #1a0f0a 0deg, #221510 20deg, #1a0f0a 40deg, #221510 60deg,
+        #1a0f0a 80deg, #221510 100deg, #1a0f0a 120deg, #221510 140deg,
+        #1a0f0a 160deg, #221510 180deg, #1a0f0a 200deg, #221510 220deg,
+        #1a0f0a 240deg, #221510 260deg, #1a0f0a 280deg, #221510 300deg,
+        #1a0f0a 320deg, #221510 340deg, #1a0f0a 360deg
+      );
+      box-shadow: 0 0 30px rgba(0,0,0,.7), inset 0 0 20px rgba(0,0,0,.5);
+      animation: spin 4s linear infinite;
+      animation-play-state: paused;
+    }
+    .vinyl.playing .vinyl-disc { animation-play-state: running; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .vinyl-label {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      width:52px; height:52px; border-radius:50%; background:radial-gradient(circle,#c9a84c,#8a6820);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .vinyl-hole { width:10px; height:10px; border-radius:50%; background:#0a0605; }
+
+    .now-title { font-family:'Bodoni Moda',serif; font-size:1.5rem; color:#f0e8e0; margin-bottom:.3rem; }
+    .now-artist { font-size:.95rem; color:#a08060; font-style:italic; }
+
+    /* Progress bar */
+    .progress-bar {
+      width:100%; height:3px; background:#2a1a10; margin:1.2rem 0 .5rem; cursor:pointer;
+      border-radius:2px; position:relative;
+    }
+    .progress-fill { height:100%; background:#c9a84c; border-radius:2px; width:0; transition:width .5s linear; pointer-events:none; }
+
+    /* Controls */
+    .controls { display:flex; align-items:center; justify-content:center; gap:1.5rem; padding:1rem 1.5rem 1.5rem; }
+    .ctrl-btn { background:none; border:none; color:#c9a84c; cursor:pointer; font-size:1.4rem; padding:.4rem; transition:transform .1s, color .1s; }
+    .ctrl-btn:hover { transform:scale(1.15); color:#e0bf60; }
+    .ctrl-btn.play-btn { width:48px; height:48px; border:1px solid #c9a84c; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .ctrl-btn.play-btn:hover { background:rgba(201,168,76,.1); }
+
+    /* YouTube embed */
+    .yt-wrap { position:relative; padding-top:56.25%; display:none; }
+    .yt-wrap iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
+    .yt-wrap.active { display:block; }
+
+    /* Playlist */
+    .playlist { list-style:none; margin:0; padding:0; }
+    .playlist li {
+      display:flex; align-items:center; gap:1rem;
+      padding:.9rem 1.2rem; border-bottom:1px solid #1a1008;
+      cursor:pointer; transition:background .15s;
+    }
+    .playlist li:hover { background:#1a1008; }
+    .playlist li.active { background:#1e1208; }
+    .playlist li:last-child { border-bottom:none; }
+    .track-num { font-size:.75rem; color:#4a3a2a; width:18px; text-align:center; flex-shrink:0; }
+    .playlist li.active .track-num { color:#c9a84c; }
+    .track-info { flex:1; }
+    .track-name { font-size:1rem; color:#f0e8e0; }
+    .playlist li.active .track-name { color:#c9a84c; }
+    .track-artist { font-size:.8rem; color:#6a5040; font-style:italic; }
+    .track-dur { font-size:.78rem; color:#4a3a2a; }
+    .track-note { font-size:.72rem; color:#8a6040; margin-top:.15rem; font-style:italic; }
+
+    /* Mood tags */
+    .mood-tag { font-size:.65rem; background:#2a1a0a; color:#c9a84c; border-radius:10px; padding:.1rem .5rem; border:1px solid #3a2a10; }
+
+    /* Now playing animation dots */
+    .bars { display:inline-flex; gap:2px; align-items:flex-end; height:14px; }
+    .bars span { width:3px; background:#c9a84c; border-radius:1px; animation:bounce 0.8s ease infinite; }
+    .bars span:nth-child(2) { animation-delay:.15s; }
+    .bars span:nth-child(3) { animation-delay:.3s; }
+    @keyframes bounce { 0%,100%{height:3px} 50%{height:12px} }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <h1>Her Playlist</h1>
+    <p class="subtitle">songs picked just for you, one feeling at a time ♦</p>
+
+    <div class="player">
+      <!-- Vinyl display -->
+      <div class="player-display">
+        <div class="vinyl" id="vinyl">
+          <div class="vinyl-disc"></div>
+          <div class="vinyl-label"><div class="vinyl-hole"></div></div>
+        </div>
+        <div class="now-title" id="nowTitle">Select a song</div>
+        <div class="now-artist" id="nowArtist">—</div>
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="ctrl-btn" id="prevBtn" title="Previous">⏮</button>
+        <button class="ctrl-btn play-btn" id="playBtn" title="Play / Pause">▶</button>
+        <button class="ctrl-btn" id="nextBtn" title="Next">⏭</button>
+      </div>
+
+      <!-- YouTube embed (hidden until play) -->
+      <div class="yt-wrap" id="ytWrap">
+        <iframe id="ytFrame" allow="autoplay" allowfullscreen></iframe>
+      </div>
+
+      <!-- Playlist -->
+      <ul class="playlist" id="playlist"></ul>
+    </div>
+
+    <p style="font-size:.78rem;color:#4a3a2a;text-align:center;font-style:italic;">
+      ♦ click a song to open it ♦ plays through YouTube ♦
+    </p>
+  </div>
+
+  <script type="module">
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const TRACKS = [
+      {
+        title: 'Snooze',
+        artist: 'SZA',
+        ytId: 'XMRPbM0vfFA',
+        mood: 'soft love',
+        note: 'for the quiet mornings',
+        dur: '3:22'
+      },
+      {
+        title: 'Naan Un',
+        artist: '24 (Tamil)',
+        ytId: 'Uf9tZ9KcFe4',
+        mood: 'cinematic',
+        note: 'feels like a whole film',
+        dur: '4:14'
+      },
+      {
+        title: 'Olave Olave',
+        artist: 'Saptasagara',
+        ytId: 'y9FHrz2paks',
+        mood: 'warmth',
+        note: 'pure feeling',
+        dur: '3:48'
+      },
+      {
+        title: 'E85',
+        artist: 'Don Toliver',
+        ytId: 'oRQn9uSFW10',
+        mood: 'late night',
+        note: 'drive with the windows down',
+        dur: '3:05'
+      },
+      {
+        title: 'Film Out',
+        artist: 'BTS',
+        ytId: 'AWjOMmNPAbs',
+        mood: 'bittersweet',
+        note: 'you know why this one\'s here',
+        dur: '4:01'
+      }
+    ];
+
+    let current = -1;
+    let playing = false;
+
+    const vinyl = document.getElementById('vinyl');
+    const nowTitle = document.getElementById('nowTitle');
+    const nowArtist = document.getElementById('nowArtist');
+    const playBtn = document.getElementById('playBtn');
+    const ytWrap = document.getElementById('ytWrap');
+    const ytFrame = document.getElementById('ytFrame');
+    const pl = document.getElementById('playlist');
+
+    // Build playlist
+    TRACKS.forEach((t, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span class="track-num">${i + 1}</span>
+        <div class="track-info">
+          <div class="track-name">${t.title} <span class="mood-tag">${t.mood}</span></div>
+          <div class="track-artist">${t.artist}</div>
+          <div class="track-note">${t.note}</div>
+        </div>
+        <span class="track-dur">${t.dur}</span>`;
+      li.addEventListener('click', () => loadTrack(i));
+      pl.appendChild(li);
+    });
+
+    function loadTrack(idx) {
+      current = idx;
+      const t = TRACKS[idx];
+      nowTitle.textContent = t.title;
+      nowArtist.textContent = t.artist;
+
+      // Highlight playlist
+      pl.querySelectorAll('li').forEach((li, i) => {
+        li.classList.toggle('active', i === idx);
+        const num = li.querySelector('.track-num');
+        if (i === idx) {
+          num.innerHTML = '<div class="bars"><span></span><span></span><span></span></div>';
+        } else {
+          num.textContent = i + 1;
+        }
+      });
+
+      // Show YouTube
+      ytFrame.src = `https://www.youtube.com/embed/${t.ytId}?autoplay=1&rel=0`;
+      ytWrap.classList.add('active');
+      vinyl.classList.add('playing');
+      playing = true;
+      playBtn.textContent = '⏸';
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (current === -1) { loadTrack(0); return; }
+      if (playing) {
+        ytFrame.src = ytFrame.src.replace('autoplay=1','autoplay=0');
+        vinyl.classList.remove('playing');
+        playing = false;
+        playBtn.textContent = '▶';
+      } else {
+        ytFrame.src = ytFrame.src.replace('autoplay=0','autoplay=1');
+        vinyl.classList.add('playing');
+        playing = true;
+        playBtn.textContent = '⏸';
+      }
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (current <= 0) loadTrack(TRACKS.length - 1);
+      else loadTrack(current - 1);
+    });
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (current >= TRACKS.length - 1) loadTrack(0);
+      else loadTrack(current + 1);
+    });
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

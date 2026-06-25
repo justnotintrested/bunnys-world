@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trackers — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: radial-gradient(ellipse 70% 60% at 50% 0%, #08100a, var(--ink) 75%);
+    }
+    .page-hero h1 { font-size: clamp(2.8rem, 8vw, 6rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.6rem; opacity: 0.7; }
+
+    .world-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 0 2rem 6rem;
+    }
+
+    .world-card {
+      border: 1px solid rgba(201,168,76,0.1);
+      background: rgba(201,168,76,0.02);
+      border-radius: var(--radius);
+      padding: 2rem 1.8rem;
+      text-decoration: none;
+      display: flex; flex-direction: column; gap: 0.6rem;
+      transition: all var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .world-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(201,168,76,0.3), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .world-card:hover { background: rgba(201,168,76,0.05); border-color: rgba(201,168,76,0.25); }
+    .world-card:hover::before { opacity: 1; }
+
+    .card-number { font-family: var(--ff-disp); font-size: 0.65rem; color: var(--gold); opacity: 0.3; letter-spacing: 0.15em; }
+    .card-title  { font-family: var(--ff-disp); font-size: 1.3rem; color: var(--cream); }
+    .card-desc   { font-size: 0.78rem; color: var(--mist); opacity: 0.55; font-style: italic; line-height: 1.6; }
+    .card-arrow  {
+      margin-top: auto; padding-top: 1rem;
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.4; transition: opacity 0.2s;
+    }
+    .world-card:hover .card-arrow { opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html" class="active">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.4;">The data of a life, beautifully kept</p>
+    <h1>Trackers</h1>
+    <p>because noticing things is its own kind of care.</p>
+  </div>
+
+  <div class="world-grid">
+
+    <a href="habits.html" class="world-card">
+      <span class="card-number">I</span>
+      <span class="card-title">Habit Tracker</span>
+      <span class="card-desc">Daily habits, tracked across the month. Build streaks. Watch the pattern emerge.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="sleep-log.html" class="world-card">
+      <span class="card-number">II</span>
+      <span class="card-title">Sleep Log</span>
+      <span class="card-desc">Bedtime, wake time, quality. For the nights that feel long and the days that feel heavy.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="mood.html" class="world-card">
+      <span class="card-number">III</span>
+      <span class="card-title">Mood Pixels</span>
+      <span class="card-desc">One colour per day. One mood per square. A whole month as a grid of feeling.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="work-log.html" class="world-card">
+      <span class="card-number">IV</span>
+      <span class="card-title">Work Log</span>
+      <span class="card-desc">What she worked on, how long, how it felt. A record of effort — even when it was invisible.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="period.html" class="world-card" style="border-color:rgba(196,30,58,0.12);background:rgba(196,30,58,0.015);">
+      <span class="card-number" style="color:var(--rose);">V</span>
+      <span class="card-title">Cycle</span>
+      <span class="card-desc">Gentle period tracking with predictions. Your body, your rhythm — private and simple.</span>
+      <span class="card-arrow" style="color:var(--rose);">Open →</span>
+    </a>
+
+    <a href="overview.html" class="world-card" style="border-color:rgba(201,168,76,0.25);background:rgba(201,168,76,0.04);">
+      <span class="card-number">VI</span>
+      <span class="card-title">Month Overview</span>
+      <span class="card-desc">Sleep, work & habits — all three pixel grids in one view. A quiet map of your month.</span>
+      <span class="card-arrow">Open →</span>
+    </a>
+
+    <a href="garden.html" class="world-card" style="border-color:rgba(90,184,64,0.15);background:rgba(90,184,64,0.015);">
+      <span class="card-number" style="color:#5ab840;">VII</span>
+      <span class="card-title">Bunny's Garden</span>
+      <span class="card-desc">Every day you log, a flower blooms in a moonlit 3D garden. Streaks bring fireflies. Go tend it.</span>
+      <span class="card-arrow" style="color:#5ab840;">Open →</span>
+    </a>
+
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    initGate();
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

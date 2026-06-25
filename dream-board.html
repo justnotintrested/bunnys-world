@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dream Board — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { background:#0d0908; color:#f0e8e0; font-family:'Cormorant Garamond',serif; min-height:100vh; overflow-x:hidden; }
+    .page-wrap { max-width:1100px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2.2rem; color:#c9a84c; margin-bottom:.2rem; }
+    .subtitle { font-style:italic; color:#a08060; margin-bottom:2rem; }
+
+    /* Toolbar */
+    .toolbar { display:flex; gap:.7rem; flex-wrap:wrap; margin-bottom:2rem; align-items:center; }
+    .tool-btn {
+      background:#1a0f0a; border:1px solid #2a1a10; color:#c9a84c; padding:.4rem 1rem;
+      border-radius:4px; cursor:pointer; font-family:'Cormorant Garamond',serif; font-size:.95rem;
+      transition:border-color .15s, background .15s;
+    }
+    .tool-btn:hover { border-color:#c9a84c; background:#221510; }
+    .tool-btn.active { background:#2a1a08; border-color:#c9a84c; }
+    .sep { width:1px; height:28px; background:#2a1a10; flex-shrink:0; }
+
+    /* Board */
+    .board {
+      position:relative; min-height:600px;
+      background:repeating-linear-gradient(
+        0deg, transparent, transparent 39px, #1a1008 39px, #1a1008 40px
+      ),
+      repeating-linear-gradient(
+        90deg, transparent, transparent 39px, #1a1008 39px, #1a1008 40px
+      );
+      border:1px solid #2a1a10; border-radius:8px; overflow:hidden;
+    }
+
+    /* Cards */
+    .dream-card {
+      position:absolute; border-radius:6px; cursor:move; user-select:none;
+      box-shadow:0 4px 20px rgba(0,0,0,.5); transition:box-shadow .15s;
+      min-width:140px; max-width:280px;
+    }
+    .dream-card:hover { box-shadow:0 8px 30px rgba(0,0,0,.7); z-index:100; }
+    .dream-card.dragging { z-index:500; box-shadow:0 12px 40px rgba(0,0,0,.8); opacity:.92; }
+
+    /* Card types */
+    .card-image { border:2px solid #2a1a10; }
+    .card-image img { width:100%; border-radius:5px; display:block; pointer-events:none; min-height:80px; object-fit:cover; }
+
+    .card-text {
+      background:#1a1008; border:1px solid #3a2a10; padding:.9rem 1rem;
+      font-size:1rem; font-style:italic; color:#f0e8e0; line-height:1.5;
+    }
+
+    .card-word {
+      background:transparent; border:none; padding:.5rem;
+      font-family:'Bodoni Moda',serif; color:#c9a84c; font-size:1.4rem; white-space:nowrap;
+    }
+
+    .card-controls {
+      position:absolute; top:-10px; right:-10px;
+      display:flex; gap:4px; opacity:0; transition:opacity .15s;
+    }
+    .dream-card:hover .card-controls { opacity:1; }
+    .card-ctrl-btn {
+      background:#1a0f0a; border:1px solid #3a2a1a; color:#c9a84c;
+      width:22px; height:22px; border-radius:50%; cursor:pointer;
+      font-size:.75rem; display:flex; align-items:center; justify-content:center;
+    }
+    .card-ctrl-btn.del { color:#8b1a1a; }
+    .card-ctrl-btn:hover { border-color:#c9a84c; background:#2a1a10; }
+    .card-ctrl-btn.del:hover { color:#c41e3a; }
+
+    /* Add panel */
+    .add-panel {
+      background:#1a0f0a; border:1px solid #2a1a10; border-radius:8px;
+      padding:1.2rem 1.5rem; margin-top:1.5rem;
+    }
+    .add-panel h3 { font-family:'Bodoni Moda',serif; color:#c9a84c; font-size:.95rem; letter-spacing:.08em; margin:0 0 .8rem; }
+    .add-tabs { display:flex; gap:.4rem; margin-bottom:1rem; }
+    .add-tab { background:none; border:1px solid #2a1a10; color:#a08060; padding:.3rem .8rem; border-radius:4px; cursor:pointer; font-family:inherit; font-size:.9rem; }
+    .add-tab.active { border-color:#c9a84c; color:#c9a84c; background:#2a1a08; }
+    .add-section { display:none; }
+    .add-section.active { display:flex; gap:.7rem; flex-wrap:wrap; align-items:flex-end; }
+    .af { display:flex; flex-direction:column; gap:.3rem; flex:1; min-width:160px; }
+    .af label { font-size:.72rem; color:#a08060; text-transform:uppercase; letter-spacing:.06em; }
+    .af input, .af textarea { background:#0d0908; border:1px solid #3a2a1a; color:#f0e8e0; padding:.4rem .7rem; border-radius:4px; font-family:inherit; font-size:.95rem; }
+    .af input:focus, .af textarea:focus { outline:none; border-color:#c9a84c; }
+    .af textarea { resize:vertical; min-height:56px; }
+    .af-btn { background:#c9a84c; border:none; color:#0d0908; padding:.44rem 1.2rem; border-radius:4px; cursor:pointer; font-family:'Bodoni Moda',serif; letter-spacing:.05em; }
+    .af-btn:hover { background:#e0bf60; }
+
+    .hint { font-size:.75rem; color:#4a3a2a; font-style:italic; margin-top:.5rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <h1>Dream Board</h1>
+    <p class="subtitle">drag your visions into place ♦</p>
+
+    <div class="toolbar">
+      <span style="font-size:.78rem;color:#6a5040;letter-spacing:.06em;">Drag cards freely ·</span>
+      <button class="tool-btn" id="clearAllBtn">Clear All</button>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="add-panel">
+      <h3>◆ Add to Board</h3>
+      <div class="add-tabs">
+        <button class="add-tab active" data-tab="image">Image</button>
+        <button class="add-tab" data-tab="text">Text</button>
+        <button class="add-tab" data-tab="word">Word / Phrase</button>
+      </div>
+
+      <div class="add-section active" id="tab-image">
+        <div class="af"><label>Image URL</label><input type="url" id="imgUrl" placeholder="https://…" /></div>
+        <div class="af" style="max-width:120px;"><label>Width (px)</label><input type="number" id="imgW" value="200" min="80" max="500" /></div>
+        <button class="af-btn" id="addImgBtn">+ Add</button>
+      </div>
+
+      <div class="add-section" id="tab-text">
+        <div class="af"><label>Text</label><textarea id="textContent" placeholder="a dream, a thought, a quote…"></textarea></div>
+        <button class="af-btn" id="addTextBtn">+ Add</button>
+      </div>
+
+      <div class="add-section" id="tab-word">
+        <div class="af"><label>Word / Phrase</label><input type="text" id="wordContent" placeholder="freedom · Milan · love · create" /></div>
+        <div class="af" style="max-width:130px;"><label>Size (rem)</label><input type="number" id="wordSize" value="1.4" step=".2" min=".8" max="4" /></div>
+        <button class="af-btn" id="addWordBtn">+ Add</button>
+      </div>
+      <p class="hint">Cards are saved automatically. Drag them wherever feels right.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, onValue, set, remove, push } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const firebaseConfig = {
+      apiKey:"AIzaSyAvEc04TFiGuYnDkgPQID9LFaU3Ot1dBnc",authDomain:"anna-birthday-site.firebaseapp.com",
+      databaseURL:"https://anna-birthday-site-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId:"anna-birthday-site",storageBucket:"anna-birthday-site.firebasestorage.app",
+      messagingSenderId:"972555476285",appId:"1:972555476285:web:5dfd0ac26dd7df9b9f7954"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const boardRef = ref(db, 'dream_board');
+
+    let cards = {};
+    const board = document.getElementById('board');
+
+    onValue(boardRef, snap => {
+      cards = snap.val() || {};
+      renderBoard();
+    });
+
+    function renderBoard() {
+      board.innerHTML = '';
+      Object.entries(cards).forEach(([key, c]) => createCard(key, c));
+    }
+
+    function createCard(key, c) {
+      const el = document.createElement('div');
+      el.className = 'dream-card';
+      el.style.left = (c.x || 40) + 'px';
+      el.style.top  = (c.y || 40) + 'px';
+
+      if (c.type === 'image') {
+        el.classList.add('card-image');
+        el.style.width = (c.w || 200) + 'px';
+        el.innerHTML = `<img src="${c.url}" alt="" loading="lazy" />`;
+      } else if (c.type === 'text') {
+        el.classList.add('card-text');
+        el.style.width = '220px';
+        el.textContent = c.content;
+      } else if (c.type === 'word') {
+        el.classList.add('card-word');
+        el.style.fontSize = (c.size || 1.4) + 'rem';
+        el.textContent = c.content;
+      }
+
+      // Controls
+      const ctrl = document.createElement('div');
+      ctrl.className = 'card-controls';
+      ctrl.innerHTML = `<button class="card-ctrl-btn del" title="Remove">×</button>`;
+      ctrl.querySelector('.del').addEventListener('click', () => remove(ref(db,'dream_board/'+key)));
+      el.appendChild(ctrl);
+
+      // Drag
+      makeDraggable(el, key);
+      board.appendChild(el);
+    }
+
+    function makeDraggable(el, key) {
+      let startX, startY, startL, startT;
+      let saveTimer;
+
+      el.addEventListener('mousedown', e => {
+        if (e.target.classList.contains('card-ctrl-btn')) return;
+        startX = e.clientX; startY = e.clientY;
+        startL = parseInt(el.style.left) || 0;
+        startT = parseInt(el.style.top) || 0;
+        el.classList.add('dragging');
+
+        const move = mv => {
+          const dx = mv.clientX - startX, dy = mv.clientY - startY;
+          const boardRect = board.getBoundingClientRect();
+          const nx = Math.max(0, Math.min(startL + dx, boardRect.width - 60));
+          const ny = Math.max(0, startT + dy);
+          el.style.left = nx + 'px';
+          el.style.top = ny + 'px';
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(() => savePos(key, nx, ny), 600);
+        };
+
+        const up = () => {
+          el.classList.remove('dragging');
+          const nx = parseInt(el.style.left);
+          const ny = parseInt(el.style.top);
+          savePos(key, nx, ny);
+          document.removeEventListener('mousemove', move);
+          document.removeEventListener('mouseup', up);
+        };
+
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+      });
+    }
+
+    function savePos(key, x, y) {
+      set(ref(db, `dream_board/${key}/x`), x);
+      set(ref(db, `dream_board/${key}/y`), y);
+    }
+
+    // Tabs
+    document.querySelectorAll('.add-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.add-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.add-section').forEach(s=>s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Add buttons
+    document.getElementById('addImgBtn').addEventListener('click', () => {
+      const url = document.getElementById('imgUrl').value.trim();
+      const w = parseInt(document.getElementById('imgW').value) || 200;
+      if (!url) return;
+      const pos = randomPos();
+      push(boardRef, { type:'image', url, w, x:pos.x, y:pos.y });
+      document.getElementById('imgUrl').value = '';
+    });
+
+    document.getElementById('addTextBtn').addEventListener('click', () => {
+      const content = document.getElementById('textContent').value.trim();
+      if (!content) return;
+      const pos = randomPos();
+      push(boardRef, { type:'text', content, x:pos.x, y:pos.y });
+      document.getElementById('textContent').value = '';
+    });
+
+    document.getElementById('addWordBtn').addEventListener('click', () => {
+      const content = document.getElementById('wordContent').value.trim();
+      const size = parseFloat(document.getElementById('wordSize').value) || 1.4;
+      if (!content) return;
+      const pos = randomPos();
+      push(boardRef, { type:'word', content, size, x:pos.x, y:pos.y });
+      document.getElementById('wordContent').value = '';
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (confirm('Clear the entire dream board?')) remove(boardRef);
+    });
+
+    function randomPos() {
+      const bw = board.offsetWidth || 800;
+      return { x: 40 + Math.random() * (bw - 260), y: 40 + Math.random() * 300 };
+    }
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

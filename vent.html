@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vent — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+      background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(26,5,5,0.55), rgba(13,9,8,0) 80%);
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 7vw, 5rem); color: var(--rose); opacity: 0.8; }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.5rem; opacity: 0.6; }
+
+    /* Notice */
+    .vent-notice {
+      max-width: 680px; margin: 2rem auto; padding: 1.2rem 2rem;
+      border: 1px solid rgba(196,30,58,0.15);
+      border-radius: var(--radius);
+      background: rgba(196,30,58,0.04);
+      text-align: center;
+      font-size: 0.75rem; font-style: italic;
+      color: var(--mist); opacity: 0.7;
+      line-height: 1.8;
+    }
+    .vent-notice strong { color: var(--rose); font-style: normal; font-weight: 400; }
+
+    /* Main vent area */
+    .vent-wrap {
+      max-width: 780px; margin: 0 auto; padding: 0 1.5rem 6rem;
+    }
+
+    .vent-box {
+      position: relative;
+      border: 1px solid rgba(196,30,58,0.15);
+      border-radius: var(--radius);
+      background: rgba(196,30,58,0.02);
+      transition: border-color 0.3s;
+    }
+    .vent-box:focus-within { border-color: rgba(196,30,58,0.35); }
+
+    .vent-textarea {
+      width: 100%; min-height: 55vh;
+      background: transparent; border: none;
+      color: var(--cream);
+      font-family: var(--ff-serif);
+      font-size: 1.1rem; line-height: 2;
+      padding: 2rem 2.5rem;
+      outline: none; resize: none;
+    }
+    .vent-textarea::placeholder {
+      color: var(--mist); opacity: 0.25; font-style: italic;
+    }
+
+    .vent-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2.5rem 1.5rem;
+      border-top: 1px solid rgba(196,30,58,0.08);
+      flex-wrap: wrap; gap: 0.8rem;
+    }
+
+    .vent-word-count {
+      font-size: 0.6rem; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.3;
+    }
+
+    .vent-actions { display: flex; gap: 0.8rem; align-items: center; }
+
+    .burn-btn {
+      background: transparent;
+      border: 1px solid rgba(196,30,58,0.3);
+      color: var(--rose); opacity: 0.7;
+      font-family: var(--ff-serif); font-size: 0.65rem;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      padding: 0.5rem 1.2rem; border-radius: var(--radius);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .burn-btn:hover { border-color: var(--rose); opacity: 1; background: rgba(196,30,58,0.08); }
+
+    /* Burn animation */
+    .burning {
+      animation: burnOut 1.2s ease forwards;
+    }
+    @keyframes burnOut {
+      0%   { opacity: 1; filter: blur(0); }
+      50%  { opacity: 0.5; filter: blur(1px); color: var(--rose); }
+      100% { opacity: 0; filter: blur(4px); transform: scale(0.97); }
+    }
+
+    /* Breathing prompt */
+    .breathing-section {
+      text-align: center; margin: 3rem 0 0;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid rgba(201,168,76,0.06);
+    }
+    .breathing-label {
+      font-size: 0.6rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.35;
+      margin-bottom: 1.5rem;
+    }
+    .breath-circle {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 1px solid rgba(201,168,76,0.2);
+      margin: 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .breath-circle.inhale {
+      animation: inhale 4s ease-in-out forwards;
+    }
+    .breath-circle.exhale {
+      animation: exhale 4s ease-in-out forwards;
+    }
+    @keyframes inhale {
+      from { transform: scale(1); border-color: rgba(201,168,76,0.2); }
+      to   { transform: scale(1.5); border-color: rgba(201,168,76,0.5); }
+    }
+    @keyframes exhale {
+      from { transform: scale(1.5); border-color: rgba(201,168,76,0.5); }
+      to   { transform: scale(1); border-color: rgba(201,168,76,0.2); }
+    }
+    .breath-text {
+      font-size: 0.55rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.5;
+    }
+    .breath-instruction {
+      margin-top: 1rem;
+      font-style: italic; color: var(--mist); opacity: 0.35;
+      font-size: 0.85rem;
+      transition: opacity 0.5s;
+    }
+
+    /* Affirmation strip */
+    .affirmation-strip {
+      text-align: center; margin: 2rem 0;
+    }
+    .affirmation-text {
+      font-style: italic; color: var(--mist); opacity: 0.4;
+      font-size: 0.9rem; line-height: 1.8;
+      max-width: 500px; margin: 0 auto;
+      transition: opacity 0.5s;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.3;color:var(--rose);">Her World</p>
+    <h1>Vent</h1>
+    <p>say it. all of it. and then let it go.</p>
+  </div>
+
+  <div class="vent-notice">
+    <strong>Nothing here is saved.</strong> This page does not talk to any server.
+    Write what you need to write — then burn it, close the tab, or just breathe.
+    This is a room, not a record.
+  </div>
+
+  <div class="vent-wrap">
+
+    <div class="vent-box" id="vent-box">
+      <textarea class="vent-textarea" id="vent-area"
+        placeholder="Start anywhere.
+
+It doesn't have to make sense. It doesn't have to be fair.
+Just write it out of you.
+
+This page remembers nothing when you close it. It's only yours, right now."></textarea>
+      <div class="vent-footer">
+        <span class="vent-word-count" id="word-count">0 words</span>
+        <div class="vent-actions">
+          <button class="burn-btn" id="burn-btn">Burn it ◆</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breathing exercise -->
+    <div class="breathing-section">
+      <p class="breathing-label">Breathe for a moment</p>
+      <div class="breath-circle" id="breath-circle">
+        <span class="breath-text" id="breath-text">begin</span>
+      </div>
+      <p class="breath-instruction" id="breath-instruction">click the circle to start a breathing exercise</p>
+    </div>
+
+    <!-- Affirmation -->
+    <div class="affirmation-strip">
+      <p class="affirmation-text" id="affirmation">
+        You are allowed to feel all of this. Every single bit.
+      </p>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    initGate();
+
+    // ── Word count ───────────────────────────────────────────────────
+    const area = document.getElementById('vent-area');
+    const wc   = document.getElementById('word-count');
+    area.addEventListener('input', () => {
+      const text = area.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      wc.textContent = `${words} word${words !== 1 ? 's' : ''}`;
+    });
+
+    // ── Burn ─────────────────────────────────────────────────────────
+    document.getElementById('burn-btn').addEventListener('click', () => {
+      if (!area.value.trim()) return;
+      area.classList.add('burning');
+      setTimeout(() => {
+        area.value = '';
+        area.classList.remove('burning');
+        wc.textContent = '0 words';
+        showAffirmation();
+      }, 1200);
+    });
+
+    // ── Affirmations ─────────────────────────────────────────────────
+    const affirmations = [
+      "You are allowed to feel all of this. Every single bit.",
+      "You don't have to be okay. Not right now. Not yet.",
+      "Whatever you're carrying — it's real, and it counts.",
+      "You are not too much. You are not too sensitive. You just feel things deeply and that is a gift.",
+      "The hard days do not define you. They pass through you.",
+      "You are still here. That matters more than you know.",
+      "Let it out. Let it breathe. Then let it go when you're ready.",
+      "Your feelings are not flaws. They are proof you are alive and present.",
+      "You survived every hard day so far. You'll survive this one too.",
+      "It's okay to not have answers right now. Rest first.",
+    ];
+
+    function showAffirmation() {
+      const el = document.getElementById('affirmation');
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.textContent = affirmations[Math.floor(Math.random() * affirmations.length)];
+        el.style.opacity = '0.4';
+      }, 400);
+    }
+
+    // Rotate affirmations every 20s
+    setInterval(showAffirmation, 20000);
+
+    // ── Breathing exercise ───────────────────────────────────────────
+    const circle  = document.getElementById('breath-circle');
+    const btext   = document.getElementById('breath-text');
+    const binstru = document.getElementById('breath-instruction');
+
+    let breathing = false;
+    let breathPhase = 'inhale';
+    let breathTimeout = null;
+
+    circle.addEventListener('click', () => {
+      if (!breathing) {
+        breathing = true;
+        runBreath();
+      }
+    });
+
+    function runBreath() {
+      if (!breathing) return;
+
+      circle.className = 'breath-circle';
+      void circle.offsetWidth; // reflow to restart animation
+
+      if (breathPhase === 'inhale') {
+        circle.classList.add('inhale');
+        btext.textContent = 'inhale';
+        binstru.textContent = 'breathe in slowly… 4 counts';
+        breathTimeout = setTimeout(() => {
+          breathPhase = 'hold';
+          runBreath();
+        }, 4000);
+      } else if (breathPhase === 'hold') {
+        btext.textContent = 'hold';
+        binstru.textContent = 'hold gently… 4 counts';
+        breathTimeout = setTimeout(() => {
+          breathPhase = 'exhale';
+          runBreath();
+        }, 4000);
+      } else {
+        circle.classList.add('exhale');
+        btext.textContent = 'exhale';
+        binstru.textContent = 'breathe out slowly… 4 counts';
+        breathTimeout = setTimeout(() => {
+          breathPhase = 'inhale';
+          runBreath();
+        }, 4000);
+      }
+    }
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

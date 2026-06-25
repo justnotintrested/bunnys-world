@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cancer Corner — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: radial-gradient(ellipse 70% 60% at 50% 0%, #050a14, var(--ink) 75%);
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 7vw, 5rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.6rem; opacity: 0.65; }
+
+    .page-wrap { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 6rem; }
+
+    /* Moon phase card */
+    .moon-card {
+      text-align: center;
+      padding: 3rem 2rem;
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: var(--radius);
+      background: rgba(201,168,76,0.02);
+      margin: 2.5rem 0;
+    }
+    .moon-display {
+      font-size: 5rem; margin-bottom: 1rem;
+      filter: drop-shadow(0 0 20px rgba(201,168,76,0.2));
+    }
+    .moon-phase-name {
+      font-family: var(--ff-disp); font-size: 1.5rem; color: var(--cream);
+      margin-bottom: 0.4rem;
+    }
+    .moon-date {
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.4;
+    }
+    .moon-illumination {
+      margin-top: 1rem;
+      font-size: 0.75rem; color: var(--gold); opacity: 0.6;
+    }
+
+    /* Season countdown */
+    .season-card {
+      padding: 2rem;
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: var(--radius);
+      background: rgba(201,168,76,0.015);
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .season-card h3 {
+      font-family: var(--ff-disp); font-size: 1.2rem;
+      color: var(--cream); margin-bottom: 0.3rem;
+    }
+    .season-card p { font-style: italic; color: var(--mist); opacity: 0.5; font-size: 0.85rem; }
+    .season-countdown {
+      display: flex; justify-content: center; gap: 2.5rem;
+      margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .sc-unit { text-align: center; }
+    .sc-num { font-family: var(--ff-disp); font-size: 2.5rem; color: var(--gold); display: block; }
+    .sc-label { font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mist); opacity: 0.4; }
+
+    /* Divider */
+    .section-divider {
+      font-size: 0.55rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.35;
+      margin: 2.5rem 0 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+    }
+
+    /* Traits grid */
+    .traits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .trait-card {
+      padding: 1.5rem;
+      border: 1px solid rgba(201,168,76,0.08);
+      border-radius: var(--radius);
+      background: rgba(201,168,76,0.015);
+    }
+    .trait-name {
+      font-family: var(--ff-disp); font-size: 1rem;
+      color: var(--gold); margin-bottom: 0.4rem;
+    }
+    .trait-desc {
+      font-size: 0.8rem; color: var(--mist); opacity: 0.6;
+      line-height: 1.65;
+    }
+
+    /* Rumi quotes for Cancer */
+    .cancer-quote {
+      padding: 2.5rem 2rem;
+      border-left: 1px solid rgba(201,168,76,0.2);
+      margin: 2rem 0;
+    }
+    .cancer-quote blockquote {
+      font-family: var(--ff-disp); font-size: 1.2rem;
+      color: var(--cream); line-height: 1.7; font-style: italic;
+    }
+    .cancer-quote cite {
+      display: block; margin-top: 0.8rem;
+      font-size: 0.62rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.45;
+    }
+
+    /* Compatible signs */
+    .signs-row {
+      display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem;
+    }
+    .sign-chip {
+      padding: 0.5rem 1.2rem;
+      border: 1px solid rgba(201,168,76,0.15); border-radius: 20px;
+      font-size: 0.7rem; color: var(--mist); opacity: 0.7;
+    }
+    .sign-chip.highlight { border-color: rgba(201,168,76,0.4); color: var(--gold); opacity: 1; }
+
+    /* Birthday countdown */
+    .bday-section {
+      padding: 2.5rem 2rem;
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: var(--radius);
+      background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(201,168,76,0.04), transparent);
+      text-align: center; margin: 2rem 0;
+    }
+    .bday-section h3 {
+      font-family: var(--ff-disp); color: var(--gold); font-size: 1.3rem;
+      margin-bottom: 0.3rem;
+    }
+    .bday-section p { font-style: italic; color: var(--mist); opacity: 0.5; font-size: 0.85rem; }
+    .bday-row {
+      display: flex; justify-content: center; gap: 2.5rem;
+      margin-top: 1.8rem; flex-wrap: wrap;
+    }
+    .bday-unit { text-align: center; }
+    .bday-num { font-family: var(--ff-disp); font-size: 3rem; color: var(--gold); display: block; }
+    .bday-label { font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mist); opacity: 0.4; }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html" class="active">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.4;">Born under the moon</p>
+    <h1>Cancer Corner</h1>
+    <p>for the girl who feels everything, survives everything, and makes it look effortless.</p>
+  </div>
+
+  <div class="page-wrap">
+
+    <!-- Moon phase -->
+    <div class="moon-card">
+      <div class="moon-display" id="moon-emoji">🌕</div>
+      <div class="moon-phase-name" id="moon-name">Loading…</div>
+      <div class="moon-date" id="moon-date">Today</div>
+      <div class="moon-illumination" id="moon-illum"></div>
+    </div>
+
+    <!-- Birthday countdown -->
+    <div class="bday-section">
+      <h3>Until Anna's 25th Birthday</h3>
+      <p>July 15, 2026 — Cancer season, right on schedule</p>
+      <div class="bday-row">
+        <div class="bday-unit">
+          <span class="bday-num" id="bday-days">—</span>
+          <span class="bday-label">Days</span>
+        </div>
+        <div class="bday-unit">
+          <span class="bday-num" id="bday-hrs">—</span>
+          <span class="bday-label">Hours</span>
+        </div>
+        <div class="bday-unit">
+          <span class="bday-num" id="bday-min">—</span>
+          <span class="bday-label">Minutes</span>
+        </div>
+        <div class="bday-unit">
+          <span class="bday-num" id="bday-sec">—</span>
+          <span class="bday-label">Seconds</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancer season -->
+    <div class="season-card">
+      <h3>Cancer Season</h3>
+      <p>June 21 — July 22 · The month the sky belongs to her</p>
+      <div class="season-countdown">
+        <div class="sc-unit">
+          <span class="sc-num" id="cs-days">—</span>
+          <span class="sc-label">Days until</span>
+        </div>
+        <div class="sc-unit">
+          <span class="sc-num" id="cs-hrs">—</span>
+          <span class="sc-label">Hours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Traits -->
+    <p class="section-divider">The Cancer Signature</p>
+    <div class="traits-grid">
+      <div class="trait-card">
+        <p class="trait-name">Deeply Feeling</p>
+        <p class="trait-desc">Cancers don't experience emotions — they live inside them. Every feeling is a full climate. This is not weakness. It's a whole weather system.</p>
+      </div>
+      <div class="trait-card">
+        <p class="trait-name">Fiercely Loyal</p>
+        <p class="trait-desc">When a Cancer loves you, it is a complete commitment. They remember everything that mattered. They show up when no one else does.</p>
+      </div>
+      <div class="trait-card">
+        <p class="trait-name">Intuitive Beyond Reason</p>
+        <p class="trait-desc">They read rooms before walking into them. They sense what people don't say. They know things they shouldn't logically know. And they're right.</p>
+      </div>
+      <div class="trait-card">
+        <p class="trait-name">Ruled by the Moon</p>
+        <p class="trait-desc">Their moods move with the tides. They need permission to rest, to feel, to pull inward. The moon knows this. So do they, eventually.</p>
+      </div>
+      <div class="trait-card">
+        <p class="trait-name">Creative at the Core</p>
+        <p class="trait-desc">Everything a Cancer makes comes from somewhere real — from a memory, a feeling, an image that wouldn't leave. Art is how they process being alive.</p>
+      </div>
+      <div class="trait-card">
+        <p class="trait-name">Quietly Resilient</p>
+        <p class="trait-desc">They cry and keep going. They break and mend themselves. They carry heavy things without showing the weight. This is one of the bravest things there is.</p>
+      </div>
+    </div>
+
+    <!-- Quote -->
+    <div class="cancer-quote">
+      <blockquote>"You were born with wings. Why prefer to crawl through life?"</blockquote>
+      <cite>— Rumi, for all the Cancers who forget</cite>
+    </div>
+
+    <!-- Compatibility -->
+    <p class="section-divider">Cosmic Companions</p>
+    <p style="font-size:0.85rem;color:var(--mist);opacity:0.55;font-style:italic;margin-bottom:1rem;">The signs that understand her particular frequency.</p>
+    <div class="signs-row">
+      <span class="sign-chip highlight">♏ Scorpio</span>
+      <span class="sign-chip highlight">♓ Pisces</span>
+      <span class="sign-chip highlight">♉ Taurus</span>
+      <span class="sign-chip">♍ Virgo</span>
+      <span class="sign-chip">♑ Capricorn</span>
+      <span class="sign-chip">♋ Cancer</span>
+    </div>
+
+    <!-- Another quote -->
+    <div class="cancer-quote" style="margin-top:3rem;">
+      <blockquote>"The wound is the place where the light enters you."</blockquote>
+      <cite>— Rumi</cite>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    initGate();
+
+    // ── Moon phase calculation ───────────────────────────────────────
+    function getMoonPhase() {
+      const now = new Date();
+      const known = new Date('2000-01-06T18:14:00Z'); // known new moon
+      const synodic = 29.530588853;
+      const diff = (now - known) / 86400000;
+      const phase = ((diff % synodic) + synodic) % synodic;
+      const illumination = Math.round((1 - Math.cos((phase / synodic) * 2 * Math.PI)) / 2 * 100);
+
+      let name, emoji;
+      if (phase < 1.85)        { name = 'New Moon';         emoji = '🌑'; }
+      else if (phase < 7.38)   { name = 'Waxing Crescent';  emoji = '🌒'; }
+      else if (phase < 9.22)   { name = 'First Quarter';    emoji = '🌓'; }
+      else if (phase < 14.76)  { name = 'Waxing Gibbous';   emoji = '🌔'; }
+      else if (phase < 16.61)  { name = 'Full Moon';        emoji = '🌕'; }
+      else if (phase < 22.15)  { name = 'Waning Gibbous';   emoji = '🌖'; }
+      else if (phase < 23.99)  { name = 'Last Quarter';     emoji = '🌗'; }
+      else if (phase < 29.53)  { name = 'Waning Crescent';  emoji = '🌘'; }
+      else                     { name = 'New Moon';         emoji = '🌑'; }
+
+      return { name, emoji, illumination };
+    }
+
+    const moon = getMoonPhase();
+    document.getElementById('moon-emoji').textContent = moon.emoji;
+    document.getElementById('moon-name').textContent  = moon.name;
+    document.getElementById('moon-date').textContent  = new Date().toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    document.getElementById('moon-illum').textContent = `${moon.illumination}% illuminated`;
+
+    // ── Birthday countdown ───────────────────────────────────────────
+    const bdayTarget = new Date('2026-07-15T00:00:00+05:30').getTime();
+
+    function updateBday() {
+      const diff = bdayTarget - Date.now();
+      if (diff <= 0) {
+        ['days','hrs','min','sec'].forEach(u => document.getElementById(`bday-${u}`).textContent = '0');
+        return;
+      }
+      document.getElementById('bday-days').textContent = Math.floor(diff / 86400000);
+      document.getElementById('bday-hrs').textContent  = Math.floor((diff % 86400000) / 3600000);
+      document.getElementById('bday-min').textContent  = Math.floor((diff % 3600000) / 60000);
+      document.getElementById('bday-sec').textContent  = Math.floor((diff % 60000) / 1000);
+    }
+    updateBday();
+    setInterval(updateBday, 1000);
+
+    // ── Cancer season countdown (June 21 next year or this year) ────
+    function nextCancerSeason() {
+      const now = new Date();
+      let year = now.getFullYear();
+      let cs = new Date(`${year}-06-21T00:00:00`);
+      if (now >= new Date(`${year}-07-22T00:00:00`)) {
+        cs = new Date(`${year + 1}-06-21T00:00:00`);
+      }
+      // If we're in Cancer season already, show days until end
+      if (now >= cs && now < new Date(`${year}-07-22T00:00:00`)) {
+        return { inSeason: true, diff: new Date(`${year}-07-22T00:00:00`) - now };
+      }
+      return { inSeason: false, diff: cs - now };
+    }
+
+    const { inSeason, diff: csDiff } = nextCancerSeason();
+    if (inSeason) {
+      document.querySelector('.season-card h3').textContent = 'Cancer Season is NOW';
+      document.querySelector('.season-card p').textContent = 'The sky belongs to her right now ✦';
+      document.getElementById('cs-days').textContent = Math.floor(csDiff / 86400000) + ' left';
+      document.getElementById('cs-hrs').textContent  = Math.floor((csDiff % 86400000) / 3600000);
+    } else {
+      document.getElementById('cs-days').textContent = Math.floor(csDiff / 86400000);
+      document.getElementById('cs-hrs').textContent  = Math.floor((csDiff % 86400000) / 3600000);
+    }
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

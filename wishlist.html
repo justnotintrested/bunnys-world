@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wishlist — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, #0e0808, var(--ink) 70%);
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 7vw, 5rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.5rem; }
+
+    /* Stats */
+    .stats-bar {
+      display: flex; justify-content: center; gap: 3rem;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+      background: rgba(201,168,76,0.02);
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-family: var(--ff-disp); font-size: 2rem; color: var(--gold); display: block; }
+    .stat-label { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mist); opacity: 0.6; }
+
+    /* Add form */
+    .add-form {
+      max-width: 900px; margin: 2rem auto; padding: 0 1.5rem;
+      display: flex; gap: 0.8rem; flex-wrap: wrap;
+    }
+    .add-form input { flex: 1; min-width: 200px; }
+    .add-form select { flex: 0 0 160px; }
+
+    /* Category tabs */
+    .cat-tabs {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      padding: 0 1.5rem; max-width: 900px; margin: 0 auto 2rem;
+    }
+    .cat-tab {
+      padding: 0.35rem 1rem;
+      font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase;
+      border: 1px solid rgba(201,168,76,0.2); border-radius: 20px;
+      background: transparent; color: var(--mist); cursor: pointer; transition: all 0.2s;
+    }
+    .cat-tab.active, .cat-tab:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold); }
+
+    /* List */
+    .list-wrap { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+    .wish-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: opacity 0.3s;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .wish-item.got { opacity: 0.4; }
+    .wish-item.got .wish-text { text-decoration: line-through; }
+
+    /* Priority dot */
+    .priority-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 0.55rem;
+    }
+    .priority-dot.high   { background: var(--rose); }
+    .priority-dot.medium { background: var(--gold); }
+    .priority-dot.low    { background: var(--mist); opacity: 0.4; }
+
+    .wish-check {
+      width: 20px; height: 20px; flex-shrink: 0;
+      border: 1px solid rgba(201,168,76,0.35); border-radius: 2px;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; margin-top: 0.15rem;
+    }
+    .wish-check:hover { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+    .wish-check.checked { background: var(--gold); border-color: var(--gold); }
+    .wish-check.checked::after { content: '✓'; color: var(--ink); font-size: 0.75rem; font-weight: bold; }
+
+    .wish-body { flex: 1; }
+    .wish-text { font-size: 1rem; color: var(--cream); line-height: 1.5; }
+    .wish-meta { display: flex; gap: 0.8rem; margin-top: 0.25rem; align-items: center; flex-wrap: wrap; }
+    .wish-cat-badge {
+      display: inline-block;
+      font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.12rem 0.45rem; border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 10px; color: var(--gold); opacity: 0.7;
+    }
+    .wish-link {
+      font-size: 0.65rem; color: var(--gold); opacity: 0.5;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .wish-link:hover { opacity: 1; }
+    .wish-price { font-size: 0.7rem; color: var(--mist); opacity: 0.5; font-style: italic; }
+
+    .wish-actions {
+      display: flex; gap: 0.4rem; opacity: 0;
+      transition: opacity 0.2s; flex-shrink: 0;
+    }
+    .wish-item:hover .wish-actions { opacity: 1; }
+    .wish-btn {
+      background: transparent; border: none; cursor: pointer;
+      color: var(--mist); font-size: 0.75rem; padding: 0.2rem 0.4rem;
+      border-radius: 2px; transition: color 0.2s;
+    }
+    .wish-btn:hover { color: var(--gold); }
+    .wish-btn.del:hover { color: var(--rose); }
+
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+      font-style: italic; color: var(--mist); opacity: 0.4;
+    }
+
+    /* Extra fields toggle */
+    .extra-fields {
+      display: none; gap: 0.8rem; flex-wrap: wrap;
+      max-width: 900px; margin: -1rem auto 0; padding: 0 1.5rem;
+    }
+    .extra-fields.show { display: flex; }
+    .extra-fields input { flex: 1; min-width: 160px; }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.5;">Her World</p>
+    <h1>Wishlist</h1>
+    <p>things to want, things to deserve, things to have someday.</p>
+    <a href="https://www.houseofcb.com" target="_blank" rel="noopener"
+       style="display:inline-block;margin-top:1.2rem;padding:.45rem 1.3rem;border:1px solid rgba(201,168,76,.4);border-radius:3px;color:var(--gold);text-decoration:none;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;transition:background .2s;"
+       onmouseover="this.style.background='rgba(201,168,76,.1)'" onmouseout="this.style.background='none'">
+      ♦ House of CB — the temple →
+    </a>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-num" id="stat-total">0</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-got">0</span>
+      <span class="stat-label">Got it ✓</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-left">0</span>
+      <span class="stat-label">Waiting</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-high" style="color:var(--rose)">0</span>
+      <span class="stat-label">High Priority</span>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  <div class="add-form">
+    <input class="input" id="new-item" type="text" placeholder="I want…" />
+    <select class="select" id="new-cat">
+      <option value="Fashion">👗 Fashion</option>
+      <option value="Beauty">💄 Beauty</option>
+      <option value="Books">📚 Books</option>
+      <option value="Home">🕯 Home</option>
+      <option value="Experience">✨ Experience</option>
+      <option value="Tech">◆ Tech</option>
+      <option value="Other">◆ Other</option>
+    </select>
+    <select class="select" id="new-priority" style="flex:0 0 130px;">
+      <option value="medium">Medium</option>
+      <option value="high">High ◆</option>
+      <option value="low">Low</option>
+    </select>
+    <button class="btn btn-ghost" id="extras-toggle" style="flex:0 0 auto;font-size:0.6rem;">+ More</button>
+    <button class="btn btn-gold" id="add-btn">Add ◆</button>
+  </div>
+
+  <!-- Extra fields -->
+  <div class="extra-fields" id="extra-fields">
+    <input class="input" id="new-link" type="url" placeholder="Link (optional)" />
+    <input class="input" id="new-price" type="text" placeholder="Price (optional)" style="flex:0 0 140px;" />
+  </div>
+
+  <!-- Category tabs -->
+  <div class="cat-tabs" style="margin-top:1.5rem;">
+    <button class="cat-tab active" data-filter="All">All</button>
+    <button class="cat-tab" data-filter="Fashion">Fashion</button>
+    <button class="cat-tab" data-filter="Beauty">Beauty</button>
+    <button class="cat-tab" data-filter="Books">Books</button>
+    <button class="cat-tab" data-filter="Home">Home</button>
+    <button class="cat-tab" data-filter="Experience">Experience</button>
+    <button class="cat-tab" data-filter="Tech">Tech</button>
+    <button class="cat-tab" data-filter="Other">Other</button>
+    <button class="cat-tab" data-filter="high">◆ High Priority</button>
+    <button class="cat-tab" data-filter="got">✓ Got It</button>
+  </div>
+
+  <div class="list-wrap">
+    <div id="list-container">
+      <div class="empty-state">Loading your wishlist…</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    import { db, ref, push, onValue, update, remove } from './js/firebase-config.js';
+
+    initGate();
+
+    const DB_PATH = 'wishlist';
+    let items = {};
+    let activeFilter = 'All';
+
+    onValue(ref(db, DB_PATH), snap => {
+      items = snap.val() || {};
+      render();
+      updateStats();
+    });
+
+    // ── Extra fields toggle ──────────────────────────────────────────
+    document.getElementById('extras-toggle').addEventListener('click', () => {
+      const el = document.getElementById('extra-fields');
+      el.classList.toggle('show');
+    });
+
+    // ── Add ──────────────────────────────────────────────────────────
+    document.getElementById('add-btn').addEventListener('click', addItem);
+    document.getElementById('new-item').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addItem();
+    });
+
+    function addItem() {
+      const text     = document.getElementById('new-item').value.trim();
+      const cat      = document.getElementById('new-cat').value;
+      const priority = document.getElementById('new-priority').value;
+      const link     = document.getElementById('new-link').value.trim();
+      const price    = document.getElementById('new-price').value.trim();
+      if (!text) return;
+      push(ref(db, DB_PATH), { text, cat, priority, link, price, got: false, createdAt: Date.now() });
+      document.getElementById('new-item').value = '';
+      document.getElementById('new-link').value = '';
+      document.getElementById('new-price').value = '';
+    }
+
+    // ── Filter tabs ──────────────────────────────────────────────────
+    document.querySelectorAll('.cat-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeFilter = tab.dataset.filter;
+        render();
+      });
+    });
+
+    // ── Render ───────────────────────────────────────────────────────
+    function render() {
+      const container = document.getElementById('list-container');
+      let entries = Object.entries(items)
+        .sort(([,a],[,b]) => {
+          const pOrder = { high:0, medium:1, low:2 };
+          return (pOrder[a.priority]||1) - (pOrder[b.priority]||1) || b.createdAt - a.createdAt;
+        });
+
+      if (activeFilter === 'got') {
+        entries = entries.filter(([,v]) => v.got);
+      } else if (activeFilter === 'high') {
+        entries = entries.filter(([,v]) => v.priority === 'high');
+      } else if (activeFilter !== 'All') {
+        entries = entries.filter(([,v]) => v.cat === activeFilter);
+      }
+
+      if (entries.length === 0) {
+        container.innerHTML = `<div class="empty-state">Nothing here — add what you want ✦</div>`;
+        return;
+      }
+
+      container.innerHTML = entries.map(([key, v]) => itemHTML(key, v)).join('');
+
+      container.querySelectorAll('.wish-check').forEach(el => {
+        el.addEventListener('click', () => {
+          update(ref(db, `${DB_PATH}/${el.dataset.key}`), { got: el.dataset.got !== 'true' });
+        });
+      });
+      container.querySelectorAll('.wish-del').forEach(el => {
+        el.addEventListener('click', () => {
+          if (confirm('Remove this wish?')) remove(ref(db, `${DB_PATH}/${el.dataset.key}`));
+        });
+      });
+    }
+
+    function itemHTML(key, v) {
+      const priorityClass = v.priority || 'medium';
+      return `
+        <div class="wish-item ${v.got ? 'got' : ''}">
+          <div class="priority-dot ${priorityClass}" title="${priorityClass} priority"></div>
+          <div class="wish-check ${v.got ? 'checked' : ''}" data-key="${key}" data-got="${v.got}"></div>
+          <div class="wish-body">
+            <p class="wish-text">${escHtml(v.text)}</p>
+            <div class="wish-meta">
+              <span class="wish-cat-badge">${v.cat || 'Other'}</span>
+              ${v.price ? `<span class="wish-price">${escHtml(v.price)}</span>` : ''}
+              ${v.link ? `<a class="wish-link" href="${escHtml(v.link)}" target="_blank" rel="noopener">→ link</a>` : ''}
+            </div>
+          </div>
+          <div class="wish-actions">
+            <button class="wish-btn del wish-del" data-key="${key}">✕</button>
+          </div>
+        </div>`;
+    }
+
+    function updateStats() {
+      const all = Object.values(items);
+      document.getElementById('stat-total').textContent = all.length;
+      document.getElementById('stat-got').textContent   = all.filter(v=>v.got).length;
+      document.getElementById('stat-left').textContent  = all.filter(v=>!v.got).length;
+      document.getElementById('stat-high').textContent  = all.filter(v=>v.priority==='high'&&!v.got).length;
+    }
+
+    function escHtml(s='') {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

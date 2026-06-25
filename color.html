@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Colour by Number — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    :root { --ink:#0d0908; --gold:#c9a84c; --cream:#f0e8e0; --mist:#a08060; }
+    body { color:var(--cream); font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:760px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2rem; color:var(--gold); margin-bottom:.15rem; }
+    .subtitle { font-style:italic; color:var(--mist); margin-bottom:1.8rem; font-size:.95rem; }
+
+    /* design picker chips */
+    .designs { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1.6rem; }
+    .design-chip {
+      background:#16100a; border:1px solid #2a1a10; color:var(--mist);
+      padding:.4rem 1rem; border-radius:20px; cursor:pointer;
+      font-family:inherit; font-size:.88rem; transition:all .15s;
+      display:flex; align-items:center; gap:.45rem;
+    }
+    .design-chip.active { border-color:var(--gold); color:var(--gold); background:#1c1408; }
+    .design-chip .done-mark { color:#5ab840; font-size:.8rem; }
+
+    /* board */
+    .board-wrap {
+      display:flex; justify-content:safe center; margin-bottom:1.4rem;
+      overflow:auto; max-height:72vh;
+      -webkit-overflow-scrolling:touch;
+      border-radius:8px;
+    }
+    .board-wrap::-webkit-scrollbar { width:6px; height:6px; }
+    .board {
+      display:grid; gap:2px;
+      background:#16100a; border:1px solid #2a1a10; border-radius:8px;
+      padding:8px; touch-action:manipulation;
+    }
+    .cell {
+      width:var(--cell, 32px); height:var(--cell, 32px);
+      border-radius:3px;
+      background:#211810;
+      display:flex; align-items:center; justify-content:center;
+      font-size:calc(var(--cell, 32px) * .42);
+      color:#5a4636; cursor:pointer; user-select:none;
+      transition:background .15s, transform .08s;
+    }
+    .cell.blank { background:transparent; cursor:default; }
+    .cell.filled { color:transparent; cursor:default; }
+    .cell.shake { animation:shake .25s; }
+    @keyframes shake { 25%{transform:translateX(-3px)} 75%{transform:translateX(3px)} }
+
+    /* palette */
+    .palette { display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.6rem; }
+    .swatch {
+      width:46px; height:46px; border-radius:50%;
+      border:2px solid transparent; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Bodoni Moda',serif; font-size:1rem;
+      color:rgba(255,255,255,.85); text-shadow:0 1px 3px rgba(0,0,0,.7);
+      transition:transform .12s, border-color .12s;
+      position:relative;
+    }
+    .swatch.sel { border-color:var(--cream); transform:scale(1.12); }
+    .swatch.done { opacity:.35; }
+    .swatch.done::after { content:'✓'; position:absolute; font-size:1.1rem; }
+
+    /* progress + actions */
+    .meta-row { display:flex; align-items:center; gap:1rem; justify-content:center; margin-bottom:2rem; flex-wrap:wrap; }
+    .prog-wrap { flex:1; max-width:280px; height:4px; background:#241810; border-radius:2px; overflow:hidden; }
+    .prog-bar { height:100%; background:var(--gold); width:0%; transition:width .3s; }
+    .prog-lbl { font-size:.75rem; color:var(--mist); }
+    .reset-btn { background:none; border:1px solid #3a2a1a; color:var(--mist); padding:.3rem .9rem; border-radius:4px; cursor:pointer; font-family:inherit; font-size:.8rem; }
+    .reset-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* celebration */
+    .celebrate {
+      text-align:center; padding:1.2rem; margin-bottom:2rem;
+      border:1px solid rgba(201,168,76,.4); border-radius:8px;
+      background:rgba(201,168,76,.06);
+      font-style:italic; font-size:1.1rem; color:var(--gold);
+      display:none;
+    }
+    .celebrate.show { display:block; animation:pop .5s; }
+    @keyframes pop { 0%{transform:scale(.92);opacity:0} 100%{transform:scale(1);opacity:1} }
+
+    /* import */
+    .import-box { background:#110b07; border:1px solid #2a1a10; border-radius:8px; padding:1.2rem 1.5rem; }
+    .import-box h3 { font-family:'Bodoni Moda',serif; color:var(--gold); font-size:.9rem; letter-spacing:.08em; margin:0 0 .6rem; }
+    .import-box p { font-size:.78rem; color:#6a5040; font-style:italic; margin-bottom:.7rem; line-height:1.6; }
+    .import-box textarea {
+      width:100%; min-height:110px; box-sizing:border-box;
+      background:#0d0908; border:1px solid #3a2a1a; color:var(--cream);
+      padding:.6rem .8rem; border-radius:4px; font-family:monospace; font-size:.75rem;
+      resize:vertical;
+    }
+    .import-box textarea:focus { outline:none; border-color:var(--gold); }
+    .import-btn { background:var(--gold); border:none; color:#0d0908; padding:.4rem 1.1rem; border-radius:4px; cursor:pointer; font-family:'Bodoni Moda',serif; margin-top:.7rem; }
+    .import-err { color:#c41e3a; font-size:.8rem; margin-top:.5rem; display:none; }
+
+    @media(max-width:560px){
+      .swatch { width:40px; height:40px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+  <div class="page-wrap">
+    <h1>Colour by Number</h1>
+    <p class="subtitle">pick a colour, find its numbers, watch it bloom ♦</p>
+
+    <div class="designs" id="designChips"></div>
+
+    <div class="celebrate" id="celebrate">✨ finished — it's beautiful, just like you ✨</div>
+
+    <div class="board-wrap"><div class="board" id="board"></div></div>
+
+    <div class="palette" id="palette"></div>
+
+    <div class="meta-row">
+      <span class="prog-lbl" id="progLbl">0%</span>
+      <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+      <button class="reset-btn" id="resetBtn">start over</button>
+    </div>
+
+    <div class="import-box">
+      <h3>◆ Import a Design</h3>
+      <p>
+        Paste a design as JSON: <code>{"name":"…","palette":["#hex","#hex"],"grid":["0112…","…"]}</code><br/>
+        Each grid row is a string of digits — 0 is empty, 1+ point to palette colours. Rows must be equal length.
+      </p>
+      <textarea id="importText" placeholder='{"name":"Little Star","palette":["#c9a84c","#f0e8e0"],"grid":["010","121","010"]}'></textarea>
+      <button class="import-btn" id="importBtn">Add to collection</button>
+      <div class="import-err" id="importErr"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, onValue, push, set, update, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const CFG={apiKey:"AIzaSyAvEc04TFiGuYnDkgPQID9LFaU3Ot1dBnc",authDomain:"anna-birthday-site.firebaseapp.com",databaseURL:"https://anna-birthday-site-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"anna-birthday-site",storageBucket:"anna-birthday-site.firebasestorage.app",messagingSenderId:"972555476285",appId:"1:972555476285:web:5dfd0ac26dd7df9b9f7954"};
+    const app=initializeApp(CFG); const db=getDatabase(app);
+
+    // ── 5 built-in designs ─────────────────────────────────────────
+    const DEFAULTS = {
+      d_heart: {
+        name:'Heart',
+        palette:['#8b1a1a','#c41e3a','#e86a80'],
+        grid:[
+          '0110000110',
+          '1221001221',
+          '1232112321',
+          '1233223321',
+          '0123333210',
+          '0012332100',
+          '0001221000',
+          '0000110000',
+        ],
+      },
+      d_bunny: {
+        name:'Bunny',
+        palette:['#8a6e4a','#f0e8e0','#e8a0b4','#3a2a20','#d4708a'],
+        grid:[
+          '0110000110',
+          '1331001331',
+          '1331001331',
+          '1221111221',
+          '1222222221',
+          '1242222421',
+          '1222552221',
+          '1222222221',
+          '0122222210',
+          '0011111100',
+        ],
+      },
+      d_tulip: {
+        name:'Tulip',
+        palette:['#c41e3a','#e86a80','#3a7a3a','#5ab840'],
+        grid:[
+          '0102010',
+          '1212121',
+          '1122211',
+          '0112110',
+          '0011100',
+          '0003000',
+          '0403040',
+          '0043400',
+          '0003000',
+          '0003000',
+        ],
+      },
+      d_butterfly: {
+        name:'Butterfly',
+        palette:['#c9a84c','#8a5ab8','#b88ad4','#3a2a20'],
+        grid:[
+          '1001001001',
+          '1201001021',
+          '1221111221',
+          '1233443321',
+          '0123443210',
+          '0123443210',
+          '1233443321',
+          '1221111221',
+          '1201001021',
+          '1001001001',
+        ],
+      },
+      d_moon: {
+        name:'Moon & Stars',
+        palette:['#c9a84c','#e8d060','#f0e8e0'],
+        grid:[
+          '0011100030',
+          '0122110000',
+          '1221000300',
+          '1210030000',
+          '1210000003',
+          '1210300000',
+          '1221000030',
+          '0122110000',
+          '0011100300',
+        ],
+      },
+    };
+
+    let designs={...DEFAULTS};   // id → design
+    let progress={};             // id → {"r_c":true}
+    let curId='d_heart';
+    let selColor=1;
+
+    // ── Firebase: imported designs + saved progress ────────────────
+    onValue(ref(db,'colorbynumber/designs'),s=>{
+      designs={...DEFAULTS, ...(s.val()||{})};
+      renderChips();
+      if(!designs[curId])curId=Object.keys(designs)[0];
+      renderAll();
+    });
+    onValue(ref(db,'colorbynumber/progress'),s=>{
+      progress=s.val()||{};
+      renderChips();
+      renderAll();
+    });
+
+    function cellsOf(d){ // list of [r,c,num]
+      const out=[];
+      d.grid.forEach((row,r)=>[...row].forEach((ch,c)=>{const n=+ch;if(n>0)out.push([r,c,n]);}));
+      return out;
+    }
+    function isDone(id){
+      const d=designs[id];if(!d)return false;
+      const p=progress[id]||{};
+      return cellsOf(d).every(([r,c])=>p[r+'_'+c]);
+    }
+
+    // ── Design chips ───────────────────────────────────────────────
+    function renderChips(){
+      const wrap=document.getElementById('designChips');wrap.innerHTML='';
+      Object.entries(designs).forEach(([id,d])=>{
+        const chip=document.createElement('button');
+        chip.className='design-chip'+(id===curId?' active':'');
+        chip.innerHTML=`${d.name}${isDone(id)?' <span class="done-mark">✓</span>':''}`;
+        chip.onclick=()=>{curId=id;selColor=1;renderChips();renderAll();};
+        wrap.appendChild(chip);
+      });
+    }
+
+    // ── Board ──────────────────────────────────────────────────────
+    function renderAll(){renderBoard();renderPalette();updateProgress();}
+
+    function renderBoard(){
+      const d=designs[curId];if(!d)return;
+      const board=document.getElementById('board');
+      board.innerHTML='';
+      const cols=d.grid[0].length;
+      board.style.gridTemplateColumns=`repeat(${cols}, var(--cell))`;
+      // responsive cell size — big grids keep readable cells and scroll instead
+      let cell;
+      if(cols>24){
+        cell=innerWidth<600?16:20;
+      }else{
+        cell=Math.min(38, Math.floor((Math.min(innerWidth,720)-80)/cols));
+      }
+      board.style.setProperty('--cell', cell+'px');
+
+      const p=progress[curId]||{};
+      d.grid.forEach((row,r)=>{
+        [...row].forEach((ch,c)=>{
+          const n=+ch;
+          const el=document.createElement('div');
+          if(n===0){el.className='cell blank';}
+          else{
+            const key=r+'_'+c;
+            const filled=!!p[key];
+            el.className='cell'+(filled?' filled':'');
+            el.textContent=n;
+            if(filled)el.style.background=d.palette[n-1];
+            else el.addEventListener('click',()=>tryFill(r,c,n,el));
+          }
+          board.appendChild(el);
+        });
+      });
+    }
+
+    function tryFill(r,c,n,el){
+      const d=designs[curId];
+      if(n!==selColor){
+        el.classList.add('shake');
+        setTimeout(()=>el.classList.remove('shake'),260);
+        return;
+      }
+      el.classList.add('filled');
+      el.style.background=d.palette[n-1];
+      el.replaceWith(el.cloneNode(true)); // remove listener
+      const key=r+'_'+c;
+      progress[curId]=progress[curId]||{};
+      progress[curId][key]=true;
+      update(ref(db,'colorbynumber/progress/'+curId),{[key]:true});
+      updateProgress();
+      renderPalette();
+    }
+
+    // ── Palette ────────────────────────────────────────────────────
+    function colorDone(n){
+      const d=designs[curId];const p=progress[curId]||{};
+      return cellsOf(d).filter(x=>x[2]===n).every(([r,c])=>p[r+'_'+c]);
+    }
+    function renderPalette(){
+      const d=designs[curId];if(!d)return;
+      const pal=document.getElementById('palette');pal.innerHTML='';
+      d.palette.forEach((col,i)=>{
+        const n=i+1;
+        const sw=document.createElement('button');
+        const done=colorDone(n);
+        sw.className='swatch'+(n===selColor?' sel':'')+(done?' done':'');
+        sw.style.background=col;
+        sw.textContent=done?'':n;
+        sw.onclick=()=>{selColor=n;renderPalette();};
+        pal.appendChild(sw);
+      });
+    }
+
+    // ── Progress ───────────────────────────────────────────────────
+    function updateProgress(){
+      const d=designs[curId];if(!d)return;
+      const total=cellsOf(d).length;
+      const p=progress[curId]||{};
+      const done=Object.keys(p).length;
+      const pct=total?Math.round(done/total*100):0;
+      document.getElementById('progBar').style.width=pct+'%';
+      document.getElementById('progLbl').textContent=pct+'%';
+      document.getElementById('celebrate').classList.toggle('show',pct===100);
+    }
+
+    document.getElementById('resetBtn').onclick=()=>{
+      if(!confirm('Start this picture over?'))return;
+      delete progress[curId];
+      remove(ref(db,'colorbynumber/progress/'+curId));
+      renderAll();
+    };
+
+    // ── Import ─────────────────────────────────────────────────────
+    document.getElementById('importBtn').onclick=()=>{
+      const err=document.getElementById('importErr');
+      err.style.display='none';
+      try{
+        const d=JSON.parse(document.getElementById('importText').value.trim());
+        if(!d.name||!Array.isArray(d.palette)||!Array.isArray(d.grid))throw new Error('needs name, palette[], grid[]');
+        if(d.palette.length<1||d.palette.length>9)throw new Error('palette must have 1–9 colours');
+        const w=d.grid[0].length;
+        if(!d.grid.every(r=>typeof r==='string'&&r.length===w))throw new Error('grid rows must be equal-length strings');
+        if(![...d.grid.join('')].every(ch=>ch>='0'&&ch<=String(d.palette.length)))throw new Error('grid digits must be 0–'+d.palette.length);
+        push(ref(db,'colorbynumber/designs'),{name:d.name,palette:d.palette,grid:d.grid});
+        document.getElementById('importText').value='';
+      }catch(e){
+        err.textContent='✗ '+e.message;
+        err.style.display='block';
+      }
+    };
+
+    addEventListener('resize',renderBoard);
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

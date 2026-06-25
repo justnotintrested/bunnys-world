@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>You Are — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, #120808, var(--ink) 70%);
+    }
+    .page-hero h1 { font-size: clamp(3rem, 9vw, 7rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.6rem; opacity: 0.6; }
+
+    /* Wall */
+    .wall-wrap {
+      max-width: 900px; margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    /* Masonry-like layout */
+    .wall-grid {
+      columns: 3;
+      column-gap: 1.2rem;
+    }
+    @media (max-width: 700px) { .wall-grid { columns: 2; } }
+    @media (max-width: 480px) { .wall-grid { columns: 1; } }
+
+    .wall-card {
+      break-inside: avoid;
+      margin-bottom: 1.2rem;
+      padding: 1.8rem 1.5rem;
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: var(--radius);
+      background: rgba(201,168,76,0.02);
+      display: block;
+      transition: all 0.3s;
+      cursor: default;
+    }
+    .wall-card:hover {
+      background: rgba(201,168,76,0.05);
+      border-color: rgba(201,168,76,0.25);
+      transform: translateY(-2px);
+    }
+
+    .card-you-are {
+      font-size: 0.52rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.4;
+      margin-bottom: 0.5rem;
+    }
+    .card-truth {
+      font-family: var(--ff-disp); font-size: 1.05rem;
+      color: var(--cream); line-height: 1.45;
+      margin-bottom: 0.6rem;
+    }
+    .card-note {
+      font-size: 0.78rem; color: var(--mist); opacity: 0.55;
+      font-style: italic; line-height: 1.65;
+    }
+
+    /* Big quote card */
+    .wall-card.big {
+      background: rgba(201,168,76,0.04);
+      border-color: rgba(201,168,76,0.2);
+      padding: 2.5rem 2rem;
+    }
+    .wall-card.big .card-truth {
+      font-size: 1.35rem;
+      color: var(--gold);
+    }
+
+    /* Add panel */
+    .add-panel {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      border: 1px dashed rgba(201,168,76,0.15);
+      border-radius: var(--radius);
+    }
+    .add-panel-title {
+      font-size: 0.58rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.4;
+      margin-bottom: 1rem;
+    }
+    .add-row { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .add-row input { flex: 1; min-width: 200px; }
+    .add-row textarea {
+      flex: 1 1 100%;
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.35;">a wall of truths</p>
+    <h1>You Are</h1>
+    <p>things that are true about you, written down so you don't forget.</p>
+  </div>
+
+  <div class="wall-wrap">
+
+    <!-- Add new truth -->
+    <div class="add-panel">
+      <p class="add-panel-title">Add something true</p>
+      <div class="add-row">
+        <input class="input" id="new-truth" type="text" placeholder="You are…" />
+        <textarea class="textarea" id="new-note" placeholder="A little more (optional)…" style="min-height:60px;"></textarea>
+      </div>
+      <div style="margin-top:0.8rem;text-align:right;">
+        <button class="btn btn-gold" id="add-btn">Add ◆</button>
+      </div>
+    </div>
+
+    <!-- Wall -->
+    <div class="wall-grid" id="wall-grid">
+      <!-- Static pre-loaded truths -->
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    import { db, ref, push, onValue, remove } from './js/firebase-config.js';
+
+    initGate();
+
+    const DB_PATH = 'you_are';
+
+    // ── Pre-loaded truths (static, always shown first) ───────────────
+    const staticTruths = [
+      { truth: "the kind of person Ginju chose", note: "Animals always know. She knew.", big: false },
+      { truth: "softer than the world deserves and stronger than it gives you credit for", note: "", big: true },
+      { truth: "someone people remember", note: "Not because you try to be memorable. Because you simply are.", big: false },
+      { truth: "a NIFT graduate", note: "You built that with your own hands. That degree belongs to you in every sense.", big: false },
+      { truth: "a McLaren fan by very good taste", note: "", big: false },
+      { truth: "real, in a world full of performances", note: "That is the rarest thing.", big: true },
+      { truth: "a Cancer heart like armour and like a garden at the same time", note: "That takes courage.", big: false },
+      { truth: "someone who makes ordinary moments feel like they matter", note: "They do. Because you're in them.", big: false },
+      { truth: "not too much — you have never been too much", note: "You are exactly enough and then some.", big: false },
+      { truth: "the main character who doesn't know she's the main character", note: "She always was.", big: false },
+      { truth: "someone who loves things fully, without apology", note: "That's one of the most beautiful things about you.", big: false },
+      { truth: "Bunny", note: "Not just a nickname. A whole character arc. And you live it every single day.", big: true },
+    ];
+
+    let userTruths = {};
+
+    onValue(ref(db, DB_PATH), snap => {
+      userTruths = snap.val() || {};
+      renderWall();
+    });
+
+    // ── Add ──────────────────────────────────────────────────────────
+    document.getElementById('add-btn').addEventListener('click', () => {
+      const truth = document.getElementById('new-truth').value.trim();
+      const note  = document.getElementById('new-note').value.trim();
+      if (!truth) return;
+      push(ref(db, DB_PATH), { truth, note, createdAt: Date.now() });
+      document.getElementById('new-truth').value = '';
+      document.getElementById('new-note').value = '';
+    });
+
+    // ── Render ───────────────────────────────────────────────────────
+    function renderWall() {
+      const grid = document.getElementById('wall-grid');
+
+      const staticHTML = staticTruths.map(t => cardHTML(t.truth, t.note, t.big, null)).join('');
+
+      const userHTML = Object.entries(userTruths)
+        .sort(([,a],[,b]) => b.createdAt - a.createdAt)
+        .map(([key, v]) => cardHTML(v.truth, v.note, false, key))
+        .join('');
+
+      grid.innerHTML = staticHTML + userHTML;
+
+      grid.querySelectorAll('.del-truth').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (confirm('Remove this?')) remove(ref(db, `${DB_PATH}/${btn.dataset.key}`));
+        });
+      });
+    }
+
+    function cardHTML(truth, note, big, key) {
+      const deleteBtn = key
+        ? `<button class="del-truth" data-key="${key}"
+             style="position:absolute;top:0.5rem;right:0.5rem;background:transparent;border:none;
+                    color:var(--mist);opacity:0;cursor:pointer;font-size:0.65rem;padding:0.2rem 0.4rem;
+                    transition:opacity 0.2s;"
+             onmouseenter="this.style.opacity='0.6'" onmouseleave="this.style.opacity='0'">✕</button>`
+        : '';
+      return `
+        <div class="wall-card ${big ? 'big' : ''}" style="position:relative;">
+          ${deleteBtn}
+          <p class="card-you-are">You are</p>
+          <p class="card-truth">${escHtml(truth)}</p>
+          ${note ? `<p class="card-note">${escHtml(note)}</p>` : ''}
+        </div>`;
+    }
+
+    function escHtml(s='') {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

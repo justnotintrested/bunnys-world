@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Month Overview — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    :root { --ink:#0d0908; --gold:#c9a84c; --cream:#f0e8e0; --mist:#a08060; }
+    body { background:var(--ink); color:var(--cream); font-family:'Cormorant Garamond',serif; min-height:100vh; }
+    .page-wrap { max-width:1100px; margin:0 auto; padding:2rem 1.5rem 5rem; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2rem; color:var(--gold); margin-bottom:.15rem; }
+    .subtitle { font-style:italic; color:var(--mist); margin-bottom:2rem; font-size:.95rem; }
+
+    .month-nav { display:flex; gap:.5rem; align-items:center; margin-bottom:2rem; }
+    .month-nav button { background:none; border:1px solid #3a2a1a; color:var(--gold); padding:.25rem .7rem; cursor:pointer; border-radius:3px; font-family:inherit; font-size:1rem; }
+    .month-nav button:hover { border-color:var(--gold); }
+    .month-label { font-family:'Bodoni Moda',serif; font-size:1.3rem; color:var(--cream); min-width:170px; text-align:center; }
+
+    .grids { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:2rem; }
+    .tracker-section { background:#0f0a06; border:1px solid #1e1208; border-radius:8px; padding:1.2rem 1.3rem 1rem; }
+    .ts-header { display:flex; align-items:baseline; gap:.8rem; margin-bottom:.8rem; }
+    .ts-title { font-family:'Bodoni Moda',serif; font-size:1.1rem; color:var(--gold); }
+    .ts-link { font-size:.72rem; color:var(--gold); text-decoration:none; margin-left:auto; opacity:.6; }
+    .ts-link:hover { opacity:1; }
+
+    .cal-table { border-collapse:separate; border-spacing:3px; margin:0 auto .8rem; }
+    .dow { font-size:.55rem; color:#5a4030; letter-spacing:.06em; text-transform:uppercase; text-align:center; padding-bottom:2px; }
+    .px { width:32px; height:32px; border-radius:4px; background:#1a1208; border:1px solid #221510; position:relative; }
+    .px .dnum { font-size:.52rem; color:#4a3a2a; padding:2px 0 0 4px; display:block; }
+    .px.empty { background:transparent; border-color:transparent; }
+    .px.future { opacity:.28; }
+    .px.today { box-shadow:0 0 0 1.5px var(--gold); }
+
+    /* sleep */
+    .s-great { background:#1e5a56; } .s-good { background:#2a4a72; }
+    .s-okay  { background:#7a5c1e; } .s-poor { background:#6a2222; }
+    /* work */
+    .w1 { background:#2a1e0a; } .w2 { background:#5a3e10; } .w3 { background:#8a6218; }
+    .w4 { background:#c9a84c; } .w5 { background:#e8d060; }
+    .w4 .dnum,.w5 .dnum { color:rgba(13,9,8,.55); }
+    /* habits */
+    .h25 { background:#1e3a1a; } .h50 { background:#2a5a22; }
+    .h75 { background:#3a8030; } .h100 { background:#5ab840; }
+    .h100 .dnum { color:rgba(13,9,8,.55); }
+    .s-great .dnum,.s-good .dnum,.s-okay .dnum,.s-poor .dnum,
+    .w1 .dnum,.w2 .dnum,.w3 .dnum,
+    .h25 .dnum,.h50 .dnum,.h75 .dnum { color:rgba(240,232,224,.55); }
+
+    .mini-stats { display:flex; gap:1.4rem; flex-wrap:wrap; justify-content:center; }
+    .mstat { display:flex; flex-direction:column; gap:.1rem; align-items:center; }
+    .mstat-val { font-family:'Bodoni Moda',serif; font-size:1.05rem; color:var(--gold); }
+    .mstat-lbl { font-size:.6rem; color:#5a4030; text-transform:uppercase; letter-spacing:.07em; }
+
+    @media(max-width:420px){ .px { width:26px; height:26px; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+  <div class="page-wrap">
+    <h1>Month Overview</h1>
+    <p class="subtitle">sleep · work · habits — the month at a glance ♦</p>
+
+    <div class="month-nav">
+      <button id="prevMonth">‹</button>
+      <span class="month-label" id="monthLabel"></span>
+      <button id="nextMonth">›</button>
+    </div>
+
+    <div class="grids">
+      <div class="tracker-section">
+        <div class="ts-header"><span class="ts-title">Sleep</span><a class="ts-link" href="sleep-log.html">→ log</a></div>
+        <table class="cal-table" id="sleepCal"></table>
+        <div class="mini-stats">
+          <div class="mstat"><span class="mstat-val" id="ss-n">0</span><span class="mstat-lbl">Nights</span></div>
+          <div class="mstat"><span class="mstat-val" id="ss-avg">—</span><span class="mstat-lbl">Avg sleep</span></div>
+          <div class="mstat"><span class="mstat-val" id="ss-great">0</span><span class="mstat-lbl">Great</span></div>
+        </div>
+      </div>
+
+      <div class="tracker-section">
+        <div class="ts-header"><span class="ts-title">Work</span><a class="ts-link" href="work-log.html">→ log</a></div>
+        <table class="cal-table" id="workCal"></table>
+        <div class="mini-stats">
+          <div class="mstat"><span class="mstat-val" id="ws-d">0</span><span class="mstat-lbl">Days</span></div>
+          <div class="mstat"><span class="mstat-val" id="ws-avg">—</span><span class="mstat-lbl">Avg hours</span></div>
+          <div class="mstat"><span class="mstat-val" id="ws-total">0h</span><span class="mstat-lbl">Total</span></div>
+        </div>
+      </div>
+
+      <div class="tracker-section">
+        <div class="ts-header"><span class="ts-title">Habits</span><a class="ts-link" href="habits.html">→ log</a></div>
+        <table class="cal-table" id="habitCal"></table>
+        <div class="mini-stats">
+          <div class="mstat"><span class="mstat-val" id="hs-d">0</span><span class="mstat-lbl">Days</span></div>
+          <div class="mstat"><span class="mstat-val" id="hs-avg">—</span><span class="mstat-lbl">Avg done</span></div>
+          <div class="mstat"><span class="mstat-val" id="hs-p">0</span><span class="mstat-lbl">Perfect</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const CFG={apiKey:"AIzaSyAvEc04TFiGuYnDkgPQID9LFaU3Ot1dBnc",authDomain:"anna-birthday-site.firebaseapp.com",databaseURL:"https://anna-birthday-site-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"anna-birthday-site",storageBucket:"anna-birthday-site.firebasestorage.app",messagingSenderId:"972555476285",appId:"1:972555476285:web:5dfd0ac26dd7df9b9f7954"};
+    const app=initializeApp(CFG); const db=getDatabase(app);
+
+    const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DOW=['M','T','W','T','F','S','S'];
+    const today=new Date();
+    let curYear=today.getFullYear(), curMonth=today.getMonth();
+    let sleepLogs={}, workLogs={}, habitLogs={}, habitList=[];
+
+    onValue(ref(db,'sleep_log'),s=>{sleepLogs=s.val()||{};renderAll();});
+    onValue(ref(db,'work_log'), s=>{workLogs=s.val()||{}; renderAll();});
+    onValue(ref(db,'habits/list'),s=>{const v=s.val()||{};habitList=Array.isArray(v)?v.filter(Boolean):Object.values(v);renderAll();});
+    onValue(ref(db,'habits/logs'),s=>{habitLogs=s.val()||{};renderAll();});
+
+    document.getElementById('prevMonth').onclick=()=>{curMonth--;if(curMonth<0){curMonth=11;curYear--;}renderAll();};
+    document.getElementById('nextMonth').onclick=()=>{curMonth++;if(curMonth>11){curMonth=0;curYear++;}renderAll();};
+
+    function ds(d){return `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+
+    function buildCal(tblId, classForDay){
+      const tbl=document.getElementById(tblId);tbl.innerHTML='';
+      const hdr=document.createElement('tr');
+      DOW.forEach(d=>{const th=document.createElement('th');th.className='dow';th.textContent=d;hdr.appendChild(th);});
+      tbl.appendChild(hdr);
+      const dim=new Date(curYear,curMonth+1,0).getDate();
+      const firstDow=(new Date(curYear,curMonth,1).getDay()+6)%7;
+      let tr=document.createElement('tr');
+      for(let i=0;i<firstDow;i++){const td=document.createElement('td');const c=document.createElement('div');c.className='px empty';td.appendChild(c);tr.appendChild(td);}
+      for(let d=1;d<=dim;d++){
+        if((firstDow+d-1)%7===0&&d!==1){tbl.appendChild(tr);tr=document.createElement('tr');}
+        const td=document.createElement('td');
+        const cell=document.createElement('div');cell.className='px';
+        const isFuture=new Date(curYear,curMonth,d)>today;
+        const isToday=curYear===today.getFullYear()&&curMonth===today.getMonth()&&d===today.getDate();
+        if(isToday)cell.classList.add('today');
+        if(isFuture)cell.classList.add('future');
+        else{const cls=classForDay(d);if(cls)cell.classList.add(cls);}
+        cell.innerHTML=`<span class="dnum">${d}</span>`;
+        td.appendChild(cell);tr.appendChild(td);
+      }
+      tbl.appendChild(tr);
+    }
+
+    function renderAll(){
+      document.getElementById('monthLabel').textContent=MONTHS[curMonth]+' '+curYear;
+      const dim=new Date(curYear,curMonth+1,0).getDate();
+
+      // Sleep
+      buildCal('sleepCal',d=>{const l=sleepLogs[ds(d)];return l&&l.feel?'s-'+l.feel:'';});
+      let n=0,tot=0,great=0;
+      for(let d=1;d<=dim;d++){const l=sleepLogs[ds(d)];if(!l)continue;n++;tot+=parseFloat(l.hours||0);if(l.feel==='great')great++;}
+      document.getElementById('ss-n').textContent=n;
+      document.getElementById('ss-avg').textContent=n&&tot?(tot/n).toFixed(1)+'h':'—';
+      document.getElementById('ss-great').textContent=great;
+
+      // Work
+      buildCal('workCal',d=>{
+        const l=workLogs[ds(d)];const h=l?parseFloat(l.hours||0):0;
+        if(h<=0)return'';if(h<=2)return'w1';if(h<=4)return'w2';if(h<=6)return'w3';if(h<=8)return'w4';return'w5';
+      });
+      let wd=0,wtot=0;
+      for(let d=1;d<=dim;d++){const l=workLogs[ds(d)];if(!l)continue;const h=parseFloat(l.hours||0);if(h<=0)continue;wd++;wtot+=h;}
+      document.getElementById('ws-d').textContent=wd;
+      document.getElementById('ws-avg').textContent=wd?(wtot/wd).toFixed(1)+'h':'—';
+      document.getElementById('ws-total').textContent=wtot.toFixed(1)+'h';
+
+      // Habits
+      const total=habitList.length;
+      const done=d=>{let c=0;habitList.forEach(h=>{if(habitLogs[h.id]&&habitLogs[h.id][ds(d)])c++;});return c;};
+      buildCal('habitCal',d=>{
+        if(!total)return'';
+        const p=done(d)/total;
+        if(p<=0)return'';if(p<=.25)return'h25';if(p<=.5)return'h50';if(p<=.75)return'h75';return'h100';
+      });
+      let hd=0,psum=0,perfect=0;
+      for(let d=1;d<=dim;d++){
+        if(new Date(curYear,curMonth,d)>today)continue;
+        const c=done(d);if(c>0){hd++;psum+=c/(total||1);if(total&&c===total)perfect++;}
+      }
+      document.getElementById('hs-d').textContent=hd;
+      document.getElementById('hs-avg').textContent=hd?Math.round(psum/hd*100)+'%':'—';
+      document.getElementById('hs-p').textContent=perfect;
+    }
+    renderAll();
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

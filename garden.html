@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bunny's Garden — Bunny's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    :root { --ink:#0d0908; --gold:#c9a84c; --cream:#f0e8e0; --mist:#a08060; }
+    body { color:var(--cream); font-family:'Cormorant Garamond',serif; min-height:100vh; overflow-x:hidden; }
+    .page-wrap { max-width:900px; margin:0 auto; padding:2rem 1.5rem 3rem; text-align:center; }
+    h1 { font-family:'Bodoni Moda',serif; font-size:2rem; color:var(--gold); margin-bottom:.15rem; }
+    .subtitle { font-style:italic; color:var(--mist); margin-bottom:1.5rem; font-size:.95rem; }
+
+    #gardenCanvas {
+      width:100%; height:min(58vh, 520px);
+      border-radius:12px; border:1px solid rgba(201,168,76,.18);
+      background:linear-gradient(to bottom, #0d0908 0%, #100c12 55%, #0a1208 100%);
+      display:block; touch-action:none;
+    }
+
+    .garden-stats { display:flex; gap:2rem; flex-wrap:wrap; justify-content:center; margin-top:1.4rem; }
+    .gstat { display:flex; flex-direction:column; gap:.15rem; }
+    .gstat-val { font-family:'Bodoni Moda',serif; font-size:1.5rem; color:var(--gold); }
+    .gstat-lbl { font-size:.66rem; color:#6a5040; text-transform:uppercase; letter-spacing:.08em; }
+    .garden-note { margin-top:1.4rem; font-size:.85rem; color:var(--mist); font-style:italic; opacity:.75; line-height:1.8; }
+    .garden-note strong { color:var(--gold); font-style:normal; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">Bunny's World</a>
+    <div class="nav-links">
+      <a href="her-world.html">Her World</a>
+      <a href="trackers.html">Trackers</a>
+      <a href="cancer-corner.html">Cancer Corner</a>
+      <a href="ginju.html">Ginju</a>
+    </div>
+  </nav>
+  <div class="page-wrap">
+    <h1>Bunny's Garden</h1>
+    <p class="subtitle">every day you log, something blooms ♦ drag to look around</p>
+
+    <canvas id="gardenCanvas"></canvas>
+
+    <div class="garden-stats">
+      <div class="gstat"><span class="gstat-val" id="gFlowers">0</span><span class="gstat-lbl">Flowers</span></div>
+      <div class="gstat"><span class="gstat-val" id="gFireflies">0</span><span class="gstat-lbl">Fireflies</span></div>
+      <div class="gstat"><span class="gstat-val" id="gDays">0</span><span class="gstat-lbl">Days tended</span></div>
+    </div>
+
+    <p class="garden-note">
+      the garden is grown by <strong>you</strong> — each day with a habit, sleep, mood or work log
+      plants a flower. great nights become <strong>gold blooms</strong>. perfect habit days become
+      <strong>roses</strong>. fireflies arrive with your streaks. come back after logging and watch it grow ♦
+    </p>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    if (!sessionStorage.getItem('bw_unlocked')) location.replace('index.html');
+
+    const CFG={apiKey:"AIzaSyAvEc04TFiGuYnDkgPQID9LFaU3Ot1dBnc",authDomain:"anna-birthday-site.firebaseapp.com",databaseURL:"https://anna-birthday-site-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"anna-birthday-site",storageBucket:"anna-birthday-site.firebasestorage.app",messagingSenderId:"972555476285",appId:"1:972555476285:web:5dfd0ac26dd7df9b9f7954"};
+    const app=initializeApp(CFG); const db=getDatabase(app);
+
+    // ── Gather "tended days" from every tracker ────────────────────
+    async function loadGardenData(){
+      const [sleep, work, mood, hlogs] = await Promise.all([
+        get(ref(db,'sleep_log')).then(s=>s.val()||{}),
+        get(ref(db,'work_log')).then(s=>s.val()||{}),
+        get(ref(db,'mood_log')).then(s=>s.val()||{}),
+        get(ref(db,'habits/logs')).then(s=>s.val()||{}),
+      ]);
+      const days=new Set();
+      const goldDays=new Set();   // great sleep → gold bloom
+      const roseDays=new Set();   // habit-logged day → rose chance
+      Object.entries(sleep).forEach(([d,v])=>{days.add(d); if(v.feel==='great')goldDays.add(d);});
+      Object.keys(work).forEach(d=>days.add(d));
+      Object.keys(mood).forEach(d=>days.add(d));
+      Object.values(hlogs).forEach(byDate=>Object.entries(byDate||{}).forEach(([d,v])=>{if(v){days.add(d);roseDays.add(d);}}));
+      // streak (consecutive days ending today) → fireflies
+      let streak=0; const t=new Date();
+      for(;;){
+        const s=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+        if(days.has(s)){streak++;t.setDate(t.getDate()-1);}else break;
+      }
+      return { days:[...days].sort(), goldDays, roseDays, streak };
+    }
+
+    // ── Scene ──────────────────────────────────────────────────────
+    const canvas=document.getElementById('gardenCanvas');
+    const isMobile=matchMedia('(max-width:600px)').matches;
+    const renderer=new THREE.WebGLRenderer({canvas, antialias:!isMobile});
+    const scene=new THREE.Scene();
+    scene.fog=new THREE.FogExp2(0x0a0d08, 0.035);
+
+    const camera=new THREE.PerspectiveCamera(50, 1, .1, 100);
+    camera.position.set(0, 3.2, 11);
+
+    function sizeRenderer(){
+      const w=canvas.clientWidth, h=canvas.clientHeight;
+      renderer.setSize(w,h,false);
+      renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile?1.5:2));
+      camera.aspect=w/h; camera.updateProjectionMatrix();
+    }
+    sizeRenderer(); addEventListener('resize',sizeRenderer);
+
+    // lights — moonlit garden
+    scene.add(new THREE.AmbientLight(0x404060, 1.2));
+    const moon=new THREE.DirectionalLight(0x9ab4d4, 1.1); moon.position.set(-6,10,4); scene.add(moon);
+    const warm=new THREE.PointLight(0xc9a84c, 14, 18); warm.position.set(0,2.5,2); scene.add(warm);
+
+    // ground
+    const ground=new THREE.Mesh(
+      new THREE.CircleGeometry(14, 40),
+      new THREE.MeshStandardMaterial({color:0x122010, roughness:1})
+    );
+    ground.rotation.x=-Math.PI/2; scene.add(ground);
+
+    // seeded random so the garden layout is stable between visits
+    function seeded(seed){ return ()=>{ seed=(seed*9301+49297)%233280; return seed/233280; }; }
+
+    // ── Flowers ────────────────────────────────────────────────────
+    const sway=[];
+    function makeFlower(rng, kind){
+      const g=new THREE.Group();
+      const h=.7+rng()*1.1;
+      const stem=new THREE.Mesh(
+        new THREE.CylinderGeometry(.025,.035,h,5),
+        new THREE.MeshStandardMaterial({color:0x2e5a28, roughness:.9})
+      );
+      stem.position.y=h/2; g.add(stem);
+
+      const colors={
+        gold:0xc9a84c, rose:0xc41e3a,
+        pink:0xd4708a, cream:0xe8e0d0, violet:0x8a5ab8,
+      };
+      const kindColor = kind==='gold'?colors.gold : kind==='rose'?colors.rose
+        : [colors.pink,colors.cream,colors.violet][Math.floor(rng()*3)];
+
+      const petalMat=new THREE.MeshStandardMaterial({
+        color:kindColor, roughness:.55,
+        emissive:kind==='gold'?0x6a5420:kind==='rose'?0x40080e:0x000000,
+      });
+      const petals=new THREE.Group();
+      const pc=5+Math.floor(rng()*3);
+      for(let i=0;i<pc;i++){
+        const p=new THREE.Mesh(new THREE.SphereGeometry(.11,6,5), petalMat);
+        p.scale.set(1,.5,.7);
+        const a=i/pc*Math.PI*2;
+        p.position.set(Math.cos(a)*.12, 0, Math.sin(a)*.12);
+        p.rotation.y=-a;
+        petals.add(p);
+      }
+      const center=new THREE.Mesh(
+        new THREE.SphereGeometry(.07,6,5),
+        new THREE.MeshStandardMaterial({color:0xe8d060, emissive:0x4a3a10})
+      );
+      petals.add(center);
+      petals.position.y=h;
+      g.add(petals);
+
+      const r=.8+rng()*9, a=rng()*Math.PI*2;
+      g.position.set(Math.cos(a)*r, 0, Math.sin(a)*r*.8);
+      g.rotation.y=rng()*Math.PI*2;
+      const s=.7+rng()*.5; g.scale.setScalar(s);
+      sway.push({obj:petals, off:rng()*Math.PI*2, amt:.04+rng()*.05});
+      return g;
+    }
+
+    // ── Fireflies ──────────────────────────────────────────────────
+    let fireflies=null, ffCount=0;
+    function makeFireflies(n){
+      ffCount=n; if(!n)return;
+      const pos=new Float32Array(n*3);
+      for(let i=0;i<n;i++){
+        pos[i*3]=(Math.random()-.5)*16;
+        pos[i*3+1]=.5+Math.random()*3;
+        pos[i*3+2]=(Math.random()-.5)*12;
+      }
+      const geo=new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+      const c=document.createElement('canvas'); c.width=c.height=32;
+      const g2=c.getContext('2d');
+      const grad=g2.createRadialGradient(16,16,0,16,16,16);
+      grad.addColorStop(0,'rgba(255,240,160,1)'); grad.addColorStop(1,'rgba(0,0,0,0)');
+      g2.fillStyle=grad; g2.fillRect(0,0,32,32);
+      fireflies=new THREE.Points(geo, new THREE.PointsMaterial({
+        size:.22, map:new THREE.CanvasTexture(c), transparent:true,
+        depthWrite:false, blending:THREE.AdditiveBlending, color:0xe8d060,
+      }));
+      scene.add(fireflies);
+    }
+
+    // ── Build garden from data ─────────────────────────────────────
+    loadGardenData().then(({days, goldDays, roseDays, streak})=>{
+      const MAX=isMobile?120:220;
+      const shown=days.slice(-MAX);
+      shown.forEach(d=>{
+        // each date seeds its own flower so the layout never shuffles
+        const seed=[...d].reduce((a,ch)=>a*31+ch.charCodeAt(0)>>>0, 7);
+        const rng=seeded(seed);
+        const kind=goldDays.has(d)?'gold':roseDays.has(d)&&rng()>.5?'rose':'wild';
+        scene.add(makeFlower(rng, kind));
+      });
+      const ff=Math.min(streak*3, 60);
+      makeFireflies(ff);
+      document.getElementById('gFlowers').textContent=shown.length;
+      document.getElementById('gFireflies').textContent=ff;
+      document.getElementById('gDays').textContent=days.length;
+    });
+
+    // ── Orbit (drag) ───────────────────────────────────────────────
+    let dragging=false, lastX=0, theta=0, targetTheta=0;
+    canvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;});
+    addEventListener('pointerup',()=>dragging=false);
+    addEventListener('pointermove',e=>{
+      if(!dragging)return;
+      targetTheta+=(e.clientX-lastX)*.005;
+      lastX=e.clientX;
+    });
+
+    // ── Animate ────────────────────────────────────────────────────
+    const clock=new THREE.Clock();
+    let running=true;
+    document.addEventListener('visibilitychange',()=>running=!document.hidden);
+    function tick(){
+      requestAnimationFrame(tick);
+      if(!running)return;
+      const t=clock.getElapsedTime();
+      theta+=(targetTheta-theta)*.06;
+      const auto=t*.05;
+      camera.position.x=Math.sin(theta+auto)*11;
+      camera.position.z=Math.cos(theta+auto)*11;
+      camera.lookAt(0,1,0);
+      sway.forEach(s=>{s.obj.rotation.z=Math.sin(t*1.2+s.off)*s.amt;});
+      if(fireflies){
+        const p=fireflies.geometry.attributes.position.array;
+        for(let i=0;i<ffCount;i++){
+          p[i*3]+=Math.sin(t*.8+i)*.004;
+          p[i*3+1]+=Math.cos(t*.6+i*1.7)*.003;
+        }
+        fireflies.geometry.attributes.position.needsUpdate=true;
+        fireflies.material.opacity=.6+Math.sin(t*2)*.3;
+      }
+      warm.intensity=12+Math.sin(t*1.5)*2;
+      renderer.render(scene,camera);
+    }
+    tick();
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookshelf — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, #08100d, var(--ink) 70%);
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 7vw, 5rem); color: var(--gold); }
+    .page-hero p  { font-style: italic; color: var(--mist); margin-top: 0.5rem; }
+
+    /* Shelf tabs */
+    .shelf-tabs {
+      display: flex; gap: 0; max-width: 900px;
+      margin: 2rem auto 0; padding: 0 1.5rem;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .shelf-tab {
+      padding: 0.6rem 1.4rem;
+      font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--mist); cursor: pointer;
+      border-bottom: 2px solid transparent;
+      background: transparent; border-top: none; border-left: none; border-right: none;
+      transition: all 0.2s; margin-bottom: -1px;
+    }
+    .shelf-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .shelf-tab:hover:not(.active) { color: var(--cream); }
+
+    /* Shelf badge counts */
+    .shelf-tab .count {
+      display: inline-block;
+      background: rgba(201,168,76,0.15);
+      color: var(--gold); border-radius: 10px;
+      font-size: 0.5rem; padding: 0.05rem 0.4rem;
+      margin-left: 0.4rem; vertical-align: middle;
+    }
+
+    /* Add form */
+    .add-form {
+      max-width: 900px; margin: 1.8rem auto; padding: 0 1.5rem;
+      display: flex; gap: 0.8rem; flex-wrap: wrap;
+    }
+    .add-form input { flex: 1; min-width: 200px; }
+    .add-form input[name="author"] { flex: 0 0 200px; }
+    .add-form select { flex: 0 0 160px; }
+
+    /* Book grid */
+    .shelf-wrap {
+      max-width: 900px; margin: 0 auto; padding: 0 1.5rem 5rem;
+    }
+
+    .shelf-section { margin-bottom: 3.5rem; }
+    .shelf-section-heading {
+      font-size: 0.58rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold);
+      opacity: 0.45; margin-bottom: 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .book-card {
+      background: rgba(201,168,76,0.025);
+      border: 1px solid rgba(201,168,76,0.1);
+      border-radius: var(--radius);
+      padding: 1.2rem 1rem;
+      position: relative;
+      transition: all 0.25s;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .book-card:hover {
+      border-color: rgba(201,168,76,0.25);
+      background: rgba(201,168,76,0.05);
+    }
+    .book-card:hover .book-actions { opacity: 1; }
+
+    .book-spine {
+      width: 4px; height: 40px;
+      background: var(--gold); opacity: 0.3;
+      border-radius: 2px; margin-bottom: 0.8rem;
+    }
+    .book-title {
+      font-family: var(--ff-disp); font-size: 0.9rem;
+      color: var(--cream); line-height: 1.3;
+      margin-bottom: 0.3rem;
+    }
+    .book-author {
+      font-size: 0.7rem; color: var(--mist); opacity: 0.6;
+      font-style: italic; margin-bottom: 0.5rem;
+    }
+
+    /* Star rating */
+    .book-stars { display: flex; gap: 2px; margin-bottom: 0.5rem; }
+    .star {
+      font-size: 0.75rem; cursor: pointer;
+      color: rgba(201,168,76,0.25);
+      transition: color 0.15s;
+    }
+    .star.lit { color: var(--gold); }
+    .star:hover, .star:hover ~ .star { color: rgba(201,168,76,0.5); }
+
+    .book-shelf-badge {
+      display: inline-block;
+      font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.1rem 0.45rem;
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 10px; color: var(--gold); opacity: 0.6;
+    }
+    .book-shelf-badge.smut { border-color: rgba(196,30,58,0.3); color: var(--rose); }
+    .book-shelf-badge.reading { border-color: rgba(201,168,76,0.4); opacity: 0.9; }
+
+    .book-actions {
+      position: absolute; top: 0.6rem; right: 0.6rem;
+      display: flex; gap: 0.3rem;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .bk-btn {
+      background: transparent; border: none;
+      color: var(--mist); font-size: 0.65rem;
+      cursor: pointer; padding: 0.15rem 0.3rem;
+      border-radius: 2px; transition: color 0.2s;
+    }
+    .bk-btn:hover { color: var(--gold); }
+    .bk-btn.del:hover { color: var(--rose); }
+
+    .shelf-empty {
+      padding: 3rem; text-align: center;
+      font-style: italic; color: var(--mist); opacity: 0.35;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.5;">Her World</p>
+    <h1>Bookshelf</h1>
+    <p>every book that lived in her hands.</p>
+  </div>
+
+
+  <!-- Shelf tabs -->
+  <div class="shelf-tabs">
+    <button class="shelf-tab active" data-shelf="all">All <span class="count" id="cnt-all">0</span></button>
+    <button class="shelf-tab" data-shelf="reading">Reading <span class="count" id="cnt-reading">0</span></button>
+    <button class="shelf-tab" data-shelf="read">Read <span class="count" id="cnt-read">0</span></button>
+    <button class="shelf-tab" data-shelf="want">Want to Read <span class="count" id="cnt-want">0</span></button>
+    <button class="shelf-tab" data-shelf="smut">Smuts ◆ <span class="count" id="cnt-smut">0</span></button>
+  </div>
+
+  <!-- Add form -->
+  <div class="add-form">
+    <input class="input" name="title" id="new-title" type="text" placeholder="Book title…" />
+    <input class="input" name="author" id="new-author" type="text" placeholder="Author" />
+    <select class="select" id="new-shelf">
+      <option value="want">Want to Read</option>
+      <option value="reading">Reading Now</option>
+      <option value="read">Read</option>
+      <option value="smut">Smut ◆</option>
+    </select>
+    <button class="btn btn-gold" id="add-btn">Add ◆</button>
+  </div>
+
+  <!-- Books -->
+  <div class="shelf-wrap">
+    <div id="books-container">
+      <div class="shelf-empty">Loading your shelf…</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    import { db, ref, push, onValue, update, remove } from './js/firebase-config.js';
+
+    initGate();
+
+    const DB_PATH = 'bookshelf';
+    let books = {};
+    let activeShelf = 'all';
+
+    const listRef = ref(db, DB_PATH);
+    onValue(listRef, snap => {
+      books = snap.val() || {};
+      render();
+      updateCounts();
+    });
+
+    // ── Add ──────────────────────────────────────────────────────────
+    document.getElementById('add-btn').addEventListener('click', addBook);
+    document.getElementById('new-title').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addBook();
+    });
+
+    function addBook() {
+      const title  = document.getElementById('new-title').value.trim();
+      const author = document.getElementById('new-author').value.trim();
+      const shelf  = document.getElementById('new-shelf').value;
+      if (!title) return;
+      push(ref(db, DB_PATH), { title, author, shelf, rating: 0, createdAt: Date.now() });
+      document.getElementById('new-title').value = '';
+      document.getElementById('new-author').value = '';
+    }
+
+    // ── Tabs ─────────────────────────────────────────────────────────
+    document.querySelectorAll('.shelf-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.shelf-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeShelf = tab.dataset.shelf;
+        render();
+      });
+    });
+
+    // ── Render ───────────────────────────────────────────────────────
+    function render() {
+      const container = document.getElementById('books-container');
+      let entries = Object.entries(books);
+
+      if (activeShelf !== 'all') {
+        entries = entries.filter(([,v]) => v.shelf === activeShelf);
+      }
+
+      if (entries.length === 0) {
+        container.innerHTML = `<div class="shelf-empty">This shelf is empty — add something beautiful ✦</div>`;
+        return;
+      }
+
+      // Group by shelf when showing all
+      if (activeShelf === 'all') {
+        const order = ['reading','read','want','smut'];
+        const labels = { reading:'Reading Now', read:'Read', want:'Want to Read', smut:'Smut ◆' };
+        const groups = {};
+        entries.forEach(([k,v]) => {
+          if (!groups[v.shelf]) groups[v.shelf] = [];
+          groups[v.shelf].push([k,v]);
+        });
+        container.innerHTML = order.filter(s => groups[s])
+          .map(s => `
+            <div class="shelf-section">
+              <p class="shelf-section-heading">${labels[s]}</p>
+              <div class="book-grid">${groups[s].map(([k,v]) => bookHTML(k,v)).join('')}</div>
+            </div>
+          `).join('');
+      } else {
+        container.innerHTML = `<div class="book-grid">${entries.map(([k,v]) => bookHTML(k,v)).join('')}</div>`;
+      }
+
+      // Star events
+      container.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', () => {
+          const key = star.dataset.key;
+          const val = parseInt(star.dataset.val);
+          const current = books[key]?.rating || 0;
+          const newRating = current === val ? 0 : val; // toggle off if same star
+          update(ref(db, `${DB_PATH}/${key}`), { rating: newRating });
+        });
+      });
+      // Move shelf events
+      container.querySelectorAll('.move-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.key;
+          const shelf = btn.dataset.shelf;
+          update(ref(db, `${DB_PATH}/${key}`), { shelf });
+        });
+      });
+      // Delete events
+      container.querySelectorAll('.bk-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (confirm('Remove this book?')) remove(ref(db, `${DB_PATH}/${btn.dataset.key}`));
+        });
+      });
+    }
+
+    function bookHTML(key, v) {
+      const stars = [1,2,3,4,5].map(n =>
+        `<span class="star ${(v.rating||0) >= n ? 'lit' : ''}" data-key="${key}" data-val="${n}">★</span>`
+      ).join('');
+
+      const shelfLabel = { reading:'Reading', read:'Read', want:'Want', smut:'Smut' };
+      const badgeClass = v.shelf === 'smut' ? 'smut' : (v.shelf === 'reading' ? 'reading' : '');
+
+      // Move-to buttons (show relevant ones)
+      const moves = {
+        want: [['reading','→ Reading'],['read','Mark Read']],
+        reading: [['read','Mark Read'],['want','← Want']],
+        read: [['reading','Re-reading'],['want','← Want']],
+        smut: [['read','→ Read']],
+      }[v.shelf] || [];
+
+      return `
+        <div class="book-card">
+          <div class="book-actions">
+            ${moves.map(([s,l]) => `<button class="bk-btn move-btn" data-key="${key}" data-shelf="${s}" title="${l}">→</button>`).join('')}
+            <button class="bk-btn del bk-del" data-key="${key}" title="Remove">✕</button>
+          </div>
+          <div class="book-spine"></div>
+          <div class="book-title">${escHtml(v.title)}</div>
+          ${v.author ? `<div class="book-author">${escHtml(v.author)}</div>` : ''}
+          <div class="book-stars">${stars}</div>
+          <span class="book-shelf-badge ${badgeClass}">${shelfLabel[v.shelf] || v.shelf}</span>
+        </div>`;
+    }
+
+    function updateCounts() {
+      const all = Object.values(books);
+      document.getElementById('cnt-all').textContent     = all.length;
+      document.getElementById('cnt-reading').textContent = all.filter(b => b.shelf==='reading').length;
+      document.getElementById('cnt-read').textContent    = all.filter(b => b.shelf==='read').length;
+      document.getElementById('cnt-want').textContent    = all.filter(b => b.shelf==='want').length;
+      document.getElementById('cnt-smut').textContent    = all.filter(b => b.shelf==='smut').length;
+    }
+
+    function escHtml(s='') {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>

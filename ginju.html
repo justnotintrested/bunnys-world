@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ginju — Bunny's World</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <style>
+    body { padding-top: 5rem; }
+
+    .page-hero {
+      text-align: center;
+      padding: 5rem 2rem 3.5rem;
+      background: radial-gradient(ellipse 70% 60% at 50% 0%, #080d0a, var(--ink) 75%);
+    }
+    .page-hero h1 { font-size: clamp(3rem, 9vw, 6.5rem); color: var(--gold); }
+    .page-hero .subtitle { font-style: italic; color: var(--mist); margin-top: 0.6rem; opacity: 0.65; }
+
+    /* Birthday banner */
+    .birthday-banner {
+      max-width: 700px; margin: 2.5rem auto;
+      padding: 1.8rem 2rem;
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: var(--radius);
+      background: rgba(201,168,76,0.03);
+      text-align: center;
+    }
+    .birthday-banner p {
+      font-size: 0.6rem; letter-spacing: 0.25em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.5;
+      margin-bottom: 0.6rem;
+    }
+    .birthday-banner h2 {
+      font-family: var(--ff-disp); font-size: 2rem;
+      color: var(--cream); margin-bottom: 0.3rem;
+    }
+    .birthday-banner .bday-sub {
+      font-style: italic; color: var(--mist); opacity: 0.55;
+      font-size: 0.85rem;
+    }
+    .countdown-row {
+      display: flex; justify-content: center; gap: 2rem;
+      margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .countdown-unit { text-align: center; }
+    .countdown-num {
+      font-family: var(--ff-disp); font-size: 2.2rem;
+      color: var(--gold); display: block;
+    }
+    .countdown-label {
+      font-size: 0.52rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.4;
+    }
+
+    /* Photo */
+    .ginju-photo-wrap {
+      max-width: 500px; margin: 3rem auto;
+      padding: 0 1.5rem; text-align: center;
+    }
+    .ginju-photo {
+      width: 100%;
+      border: 1px solid rgba(201,168,76,0.12);
+      border-radius: var(--radius);
+      display: block;
+    }
+    .photo-caption {
+      font-size: 0.6rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.35;
+      margin-top: 0.8rem;
+    }
+
+    /* Photo placeholder */
+    .ginju-placeholder {
+      width: 100%; height: 340px;
+      border: 1px dashed rgba(201,168,76,0.15);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.8rem;
+    }
+    .ginju-placeholder p {
+      font-size: 0.65rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--mist); opacity: 0.3;
+    }
+
+    /* Facts section */
+    .facts-section {
+      max-width: 800px; margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+    .facts-heading {
+      font-size: 0.58rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.4;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+      padding-bottom: 0.5rem;
+    }
+    .fact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .fact-card {
+      padding: 1.2rem 1.5rem;
+      border: 1px solid rgba(201,168,76,0.08);
+      border-radius: var(--radius);
+      background: rgba(201,168,76,0.015);
+    }
+    .fact-label {
+      font-size: 0.52rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.45;
+      margin-bottom: 0.4rem;
+    }
+    .fact-value {
+      font-size: 0.9rem; color: var(--cream); line-height: 1.5;
+    }
+
+    /* Love note */
+    .love-note {
+      max-width: 700px; margin: 2rem auto;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(201,168,76,0.08);
+      border-bottom: 1px solid rgba(201,168,76,0.08);
+    }
+    .love-note p {
+      font-style: italic; color: var(--mist); opacity: 0.55;
+      font-size: 1rem; line-height: 1.9;
+    }
+    .love-note .ornament { color: var(--gold); opacity: 0.3; }
+
+    /* Mood board */
+    .mood-section {
+      max-width: 800px; margin: 2rem auto;
+      padding: 0 1.5rem 5rem;
+    }
+    .mood-title {
+      font-size: 0.58rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold); opacity: 0.4;
+      margin-bottom: 1.2rem;
+    }
+    .mood-chips {
+      display: flex; flex-wrap: wrap; gap: 0.6rem;
+    }
+    .mood-chip {
+      padding: 0.4rem 1rem;
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 20px;
+      font-size: 0.7rem; color: var(--mist); opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="index.html" class="nav-logo">Bunny's World</a>
+    <ul class="nav-links">
+      <li><a href="her-world.html">Her World</a></li>
+      <li><a href="trackers.html">Trackers</a></li>
+      <li><a href="cancer-corner.html">Cancer Corner</a></li>
+      <li><a href="ginju.html" class="active">Ginju</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="caps mist" style="font-size:0.6rem;margin-bottom:1rem;opacity:0.4;">The one who chose her</p>
+    <h1>Ginju</h1>
+    <p class="subtitle">the cat who knows everything and tells nothing.</p>
+  </div>
+
+  <!-- Birthday countdown -->
+  <div style="max-width:700px;margin:2.5rem auto;padding:0 1.5rem;">
+    <div class="birthday-banner">
+      <p>Birthday</p>
+      <h2>July 13, 2026</h2>
+      <p class="bday-sub">the same day as Anna — they were always meant to find each other</p>
+      <div class="countdown-row">
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-days">—</span>
+          <span class="countdown-label">Days</span>
+        </div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-hrs">—</span>
+          <span class="countdown-label">Hours</span>
+        </div>
+        <div class="countdown-unit">
+          <span class="countdown-num" id="cd-min">—</span>
+          <span class="countdown-label">Minutes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo -->
+  <div class="ginju-photo-wrap">
+    <div class="ginju-placeholder">
+      <span style="font-size:2rem;opacity:0.15;">◆</span>
+      <p>Ginju's photo coming soon</p>
+    </div>
+    <p class="photo-caption">Ginju — the best decision Anna ever made</p>
+  </div>
+
+  <!-- Facts -->
+  <div class="facts-section">
+    <p class="facts-heading">About Ginju</p>
+    <div class="fact-grid">
+      <div class="fact-card">
+        <p class="fact-label">Birthday</p>
+        <p class="fact-value">July 13 — a Cancer, like her person</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Personality</p>
+        <p class="fact-value">Deliberate. Quiet. Perceptive. Chose Anna on purpose.</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Superpower</p>
+        <p class="fact-value">Knows when Anna needs company without being asked</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Opinion on humans</p>
+        <p class="fact-value">Selective. Has vetted exactly one human and approved.</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Favourite thing</p>
+        <p class="fact-value">Sitting close enough to be felt but not close enough to be held</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Shared trait</p>
+        <p class="fact-value">Both are soft, fierce, and deeply misunderstood by people who don't deserve them</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Love note -->
+  <div class="love-note">
+    <span class="ornament">✦</span>
+    <p>
+      Cats are very deliberate about these things.
+      When Ginju chose Anna, she knew.
+      She picked someone who would understand the language of gentle presence —
+      someone who could sit in a room and make it feel softer just by being in it.
+    </p>
+    <p style="margin-top:1.2rem;">
+      They share a birthday. They share a way of seeing the world.
+      They share the particular gift of making whoever they love feel
+      like the only one in the room.
+    </p>
+    <span class="ornament" style="margin-bottom:0;">✦</span>
+  </div>
+
+  <!-- Mood chips -->
+  <div class="mood-section">
+    <p class="mood-title">Ginju Aesthetic</p>
+    <div class="mood-chips">
+      <span class="mood-chip">midnight window sitter</span>
+      <span class="mood-chip">unbothered royalty</span>
+      <span class="mood-chip">slow blink energy</span>
+      <span class="mood-chip">knows your secrets</span>
+      <span class="mood-chip">extremely judgemental of everyone except Anna</span>
+      <span class="mood-chip">Cancer sun (probably)</span>
+      <span class="mood-chip">does not explain herself</span>
+      <span class="mood-chip">always watching</span>
+      <span class="mood-chip">velvet paws</span>
+      <span class="mood-chip">chose wisely</span>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initGate } from './js/gate.js';
+    initGate();
+
+    // Countdown to July 13, 2026 IST
+    function updateCountdown() {
+      const target = new Date('2026-07-13T00:00:00+05:30').getTime();
+      const now = Date.now();
+      const diff = target - now;
+      if (diff <= 0) {
+        document.getElementById('cd-days').textContent = '0';
+        document.getElementById('cd-hrs').textContent  = '0';
+        document.getElementById('cd-min').textContent  = '0';
+        return;
+      }
+      const days = Math.floor(diff / 86400000);
+      const hrs  = Math.floor((diff % 86400000) / 3600000);
+      const min  = Math.floor((diff % 3600000) / 60000);
+      document.getElementById('cd-days').textContent = days;
+      document.getElementById('cd-hrs').textContent  = hrs;
+      document.getElementById('cd-min').textContent  = min;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
+  </script>
+  <script type="module">
+    import { initPlayer } from './js/player.js';
+    initPlayer();
+  </script>
+  <script type="module">
+    import { initScene } from './js/scene3d.js';
+    initScene();
+  </script>
+  <script type="module">
+    import { initPixelate } from './js/pixelate.js';
+    initPixelate();
+  </script>
+</body>
+</html>
